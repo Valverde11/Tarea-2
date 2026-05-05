@@ -1,0 +1,10 @@
+{
+    "java.project.sourcePaths": [
+        "src",
+        "src/structures",
+        "src/benchmark",
+        "src/ui",
+        "src/util"
+    ],
+    "java.project.outputPath": "out"
+}
