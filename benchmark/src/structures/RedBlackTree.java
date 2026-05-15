@@ -1,8 +1,4 @@
 
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Red-Black Tree implementation.
  * Only insert and search are measured (delete is N/A per assignment spec).
@@ -156,14 +152,14 @@ public class RedBlackTree {
     public RBNode getRoot() { return root; }
     public RBNode getNIL() { return NIL; }
 
-    public List<int[]> getSnapshot() {
-        List<int[]> nodes = new ArrayList<>();
+    public SnapshotArray  getSnapshot() {
+        SnapshotArray nodes = new SnapshotArray();
         collectSnapshot(root, nodes, 0, 0, 0);
         return nodes;
     }
 
     /** Returns [element, depth, pos, parentIdx, myIdx, color(1=red,0=black)] */
-    private void collectSnapshot(RBNode node, List<int[]> nodes, int depth, int pos, int parentIdx) {
+    private void collectSnapshot(RBNode node, SnapshotArray nodes, int depth, int pos, int parentIdx) {
         if (node == NIL) return;
         int myIdx = nodes.size();
         nodes.add(new int[]{node.element, depth, pos, parentIdx, myIdx, node.color ? 1 : 0});

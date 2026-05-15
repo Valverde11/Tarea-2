@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 /**
  * Panel that renders two trees side by side using canvas drawing.
@@ -16,8 +15,8 @@ public class TreeVisualizerPanel extends JPanel {
     private SplayTree splay;
     private RedBlackTree rb;
 
-    private List<int[]> snapshotA;
-    private List<int[]> snapshotB;
+    private SnapshotArray snapshotA;
+    private SnapshotArray snapshotB;
 
     public TreeVisualizerPanel() {
         setBackground(new Color(30, 30, 40));
@@ -44,7 +43,7 @@ public class TreeVisualizerPanel extends JPanel {
         snapshotB = getSnapshot(treeBType);
     }
 
-    private List<int[]> getSnapshot(String type) {
+    private SnapshotArray getSnapshot(String type) {
         return switch (type) {
             case "BST" -> bst != null ? bst.getSnapshot() : null;
             case "AVL" -> avl != null ? avl.getSnapshot() : null;
@@ -95,12 +94,15 @@ public class TreeVisualizerPanel extends JPanel {
         g2.drawString("(empty — run benchmark first)", xMin + 20, h / 2);
     }
 
-    private void drawTree(Graphics2D g2, List<int[]> nodes, int xMin, int xMax, int h, boolean isRB) {
+    private void drawTree(Graphics2D g2, SnapshotArray nodes, int xMin, int xMax, int h, boolean isRB) {
         if (nodes.isEmpty()) return;
 
         // Compute max depth to determine vertical spacing
         int maxDepth = 0;
-        for (int[] n : nodes) if (n[1] > maxDepth) maxDepth = n[1];
+        for (int i = 0; i < nodes.size(); i++) {
+            int[] n = nodes.get(i);
+            if (n[1] > maxDepth) maxDepth = n[1];
+        }
 
         int vSpacing = Math.max(40, (h - 60) / (maxDepth + 1));
         int nodeRadius = 16;

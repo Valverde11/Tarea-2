@@ -1,8 +1,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Shows step-by-step insertion sequence for a chosen structure.
@@ -19,8 +17,8 @@ public class SequencePanel extends JDialog {
     private JButton prevBtn, nextBtn;
 
     // Snapshots: one per insertion
-    private List<List<int[]>> snapshots = new ArrayList<>();
-    private List<String> stepDescriptions = new ArrayList<>();
+    private SnapshotMatrix snapshots = new SnapshotMatrix();
+    private StringArray stepDescriptions = new StringArray();
 
     public SequencePanel(JFrame parent) {
         super(parent, "Paso a Paso / Step-by-Step", true);
@@ -114,7 +112,7 @@ public class SequencePanel extends JDialog {
             if (splay != null) splay.insert(v);
             if (rb != null)    rb.insert(v);
 
-            List<int[]> snap = null;
+            SnapshotArray snap = null;
             if (bst != null)   snap = bst.getSnapshot();
             if (avl != null)   snap = avl.getSnapshot();
             if (splay != null) snap = splay.getSnapshot();
@@ -143,7 +141,7 @@ public class SequencePanel extends JDialog {
         // For linear structures show text-based steps
         int limit = Math.min(keys.length, 40);
         for (int i = 0; i < limit; i++) {
-            snapshots.add(new ArrayList<>()); // empty tree snapshot
+            snapshots.add(new SnapshotArray()); // empty tree snapshot
             StringBuilder sb = new StringBuilder("Step " + (i + 1) + ": inserted " + keys[i] + " | ");
             sb.append(type).append(" (linear) — size: ").append(i + 1);
             if (i > 0) {
@@ -172,11 +170,11 @@ public class SequencePanel extends JDialog {
         nextBtn.setEnabled(currentStep < total - 1);
 
         // Repaint tree with snapshot at currentStep
-        List<int[]> snap = snapshots.get(currentStep);
+        SnapshotArray snap = snapshots.get(currentStep);
         repaintSingleSnapshot(snap);
     }
 
-    private void repaintSingleSnapshot(List<int[]> snap) {
+    private void repaintSingleSnapshot(SnapshotArray snap) {
         // We re-draw the treePanel with only the partial snapshot
         // Use a custom approach: override the left panel with the step snapshot
         treePanel.setTrees(null, null, null, null);
