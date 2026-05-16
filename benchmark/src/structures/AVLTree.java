@@ -1,8 +1,4 @@
 
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * AVL Tree implementation.
  * Balances via single and double rotations.
@@ -130,13 +126,13 @@ public class AVLTree {
     public boolean isEmpty() { return root == null; }
     public AVLNode getRoot() { return root; }
 
-    public List<int[]> getSnapshot() {
-        List<int[]> nodes = new ArrayList<>();
+    public SnapshotArray getSnapshot() {
+        SnapshotArray nodes = new SnapshotArray();
         collectSnapshot(root, nodes, 0, 0, 0);
         return nodes;
     }
 
-    private void collectSnapshot(AVLNode node, List<int[]> nodes, int depth, int pos, int parentIdx) {
+    private void collectSnapshot(AVLNode node, SnapshotArray nodes, int depth, int pos, int parentIdx) {
         if (node == null) return;
         int myIdx = nodes.size();
         nodes.add(new int[]{node.element, depth, pos, parentIdx, myIdx});

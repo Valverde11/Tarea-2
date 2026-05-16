@@ -1,8 +1,4 @@
 
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Splay Tree implementation.
  * Uses Zig, Zig-Zig and Zig-Zag rotations to bring accessed nodes to the root.
@@ -137,13 +133,13 @@ public class SplayTree {
     public boolean isEmpty() { return root == null; }
     public SplayNode getRoot() { return root; }
 
-    public List<int[]> getSnapshot() {
-        List<int[]> nodes = new ArrayList<>();
+    public SnapshotArray getSnapshot() {
+        SnapshotArray nodes = new SnapshotArray();
         collectSnapshot(root, nodes, 0, 0, 0);
         return nodes;
     }
 
-    private void collectSnapshot(SplayNode node, List<int[]> nodes, int depth, int pos, int parentIdx) {
+    private void collectSnapshot(SplayNode node, SnapshotArray nodes, int depth, int pos, int parentIdx) {
         if (node == null) return;
         int myIdx = nodes.size();
         nodes.add(new int[]{node.element, depth, pos, parentIdx, myIdx});
