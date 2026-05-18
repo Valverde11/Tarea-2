@@ -214,7 +214,7 @@ public class SequencePanel extends JDialog {
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btn.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
+        btn.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
     }
 
     private void styleCombo(JComboBox<?> combo) {

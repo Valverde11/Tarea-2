@@ -62,7 +62,7 @@ public class BenchmarkFrame extends JFrame {
         // ---- Center (tabs: table + log) ----
         JTabbedPane tabs = new JTabbedPane();
         tabs.setBackground(new Color(40, 40, 55));
-        tabs.setForeground(Color.WHITE);
+        tabs.setForeground(Color.BLACK);
         tabs.setFont(new Font("SansSerif", Font.BOLD, 13));
 
         tabs.addTab("📊 Results Table", buildResultsPanel());
@@ -141,7 +141,7 @@ public class BenchmarkFrame extends JFrame {
         arrayCheck = addCheck(panel, "Array");
         listCheck  = addCheck(panel, "Lista enlazada");
 
-        panel.add(Box.createVerticalStrut(14));
+        panel.add(Box.createVerticalStrut(10));
 
         // Buttons
         Color buttonBlue = new Color(55, 130, 220);
@@ -158,13 +158,13 @@ public class BenchmarkFrame extends JFrame {
         seqBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         panel.add(defaultsBtn);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(3));
         panel.add(runBtn);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(3));
         panel.add(exportBtn);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(3));
         panel.add(vizBtn);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(3));
         panel.add(seqBtn);
 
         // Actions
@@ -190,8 +190,9 @@ public class BenchmarkFrame extends JFrame {
         resultTable.setForeground(Color.WHITE);
         resultTable.setFont(new Font("Monospaced", Font.PLAIN, 12));
         resultTable.setRowHeight(22);
-        resultTable.getTableHeader().setBackground(new Color(30, 80, 160));
-        resultTable.getTableHeader().setForeground(Color.WHITE);
+        Color headerBlue = new Color(55, 130, 220);
+        resultTable.getTableHeader().setBackground(headerBlue);
+        resultTable.getTableHeader().setForeground(Color.BLACK);
         resultTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
         resultTable.setGridColor(new Color(60, 65, 85));
         resultTable.setSelectionBackground(new Color(70, 90, 140));
@@ -561,8 +562,8 @@ public class BenchmarkFrame extends JFrame {
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btn.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        btn.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
