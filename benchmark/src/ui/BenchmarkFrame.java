@@ -144,11 +144,12 @@ public class BenchmarkFrame extends JFrame {
         panel.add(Box.createVerticalStrut(14));
 
         // Buttons
-        JButton defaultsBtn = bigButton("⚡ Cargar valores por defecto", new Color(60, 110, 170));
-        JButton runBtn      = bigButton("▶ Ejecutar Benchmark",          new Color(60, 160, 80));
-        JButton exportBtn   = bigButton("💾 Exportar CSV",               new Color(120, 80, 160));
-        JButton vizBtn      = bigButton("🌳 Visualizar árboles",         new Color(150, 100, 50));
-        JButton seqBtn      = bigButton("🔢 Secuencia paso a paso",      new Color(80, 120, 150));
+        Color buttonBlue = new Color(55, 130, 220);
+        JButton defaultsBtn = bigButton("⚡ Cargar valores por defecto", buttonBlue);
+        JButton runBtn      = bigButton("▶ Ejecutar Benchmark",          buttonBlue);
+        JButton exportBtn   = bigButton("💾 Exportar CSV",               buttonBlue);
+        JButton vizBtn      = bigButton("🌳 Visualizar árboles",         buttonBlue);
+        JButton seqBtn      = bigButton("🔢 Secuencia paso a paso",      buttonBlue);
 
         defaultsBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         runBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -189,7 +190,7 @@ public class BenchmarkFrame extends JFrame {
         resultTable.setForeground(Color.WHITE);
         resultTable.setFont(new Font("Monospaced", Font.PLAIN, 12));
         resultTable.setRowHeight(22);
-        resultTable.getTableHeader().setBackground(new Color(50, 60, 90));
+        resultTable.getTableHeader().setBackground(new Color(30, 80, 160));
         resultTable.getTableHeader().setForeground(Color.WHITE);
         resultTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
         resultTable.setGridColor(new Color(60, 65, 85));
@@ -416,7 +417,7 @@ public class BenchmarkFrame extends JFrame {
         topPanel.add(comboB);
 
         JButton refreshBtn = new JButton("🔄 Actualizar");
-        styleButton2(refreshBtn, new Color(60, 120, 180));
+        styleButton2(refreshBtn, new Color(55, 130, 220));
         topPanel.add(refreshBtn);
         vizDialog.add(topPanel, BorderLayout.NORTH);
 
@@ -553,6 +554,9 @@ public class BenchmarkFrame extends JFrame {
 
     private JButton bigButton(String text, Color bg) {
         JButton btn = new JButton(text);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
@@ -584,6 +588,9 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void styleButton2(JButton btn, Color bg) {
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);

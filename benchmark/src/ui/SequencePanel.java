@@ -43,7 +43,7 @@ public class SequencePanel extends JDialog {
         topPanel.add(typeCombo);
 
         JButton loadBtn = new JButton("Load");
-        styleButton(loadBtn, new Color(60, 130, 200));
+        styleButton(loadBtn, new Color(55, 130, 220));
         topPanel.add(loadBtn);
         add(topPanel, BorderLayout.NORTH);
 
@@ -58,8 +58,8 @@ public class SequencePanel extends JDialog {
 
         prevBtn = new JButton("◀ Prev");
         nextBtn = new JButton("Next ▶");
-        styleButton(prevBtn, new Color(80, 80, 120));
-        styleButton(nextBtn, new Color(80, 80, 120));
+        styleButton(prevBtn, new Color(55, 130, 220));
+        styleButton(nextBtn, new Color(55, 130, 220));
         stepLabel = new JLabel("Step 0 / 0");
         stepLabel.setForeground(Color.WHITE);
         stepLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -207,6 +207,9 @@ public class SequencePanel extends JDialog {
     }
 
     private void styleButton(JButton btn, Color bg) {
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
