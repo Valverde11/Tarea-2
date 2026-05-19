@@ -15,7 +15,7 @@ Aplicación Java para comparar el desempeño (tiempos y comparaciones de clave) 
 cd benchmark
 
 # Ejecutar
-build.bat
+java -cp out Main
 ```
 
 ## Interfaz Gráfica
