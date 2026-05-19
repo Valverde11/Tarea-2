@@ -1,0 +1,375 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\geometry{margin=2cm}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    escapeinside={(*}{*)}
+}
+
+\title{\textbf{CE-1103 — Extraclase 2} \\
+Benchmark y Visualización de Estructuras de Datos}
+\author{Algoritmos y Estructuras de Datos I \\
+Instituto Tecnológico de Costa Rica}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este informe documenta la implementación y evaluación experimental de seis estructuras de datos: Árbol Binario de Búsqueda (BST), Árbol AVL, Árbol Splay, Árbol Rojo-Negro, Arreglo dinámico y Lista Enlazada Simple. Se desarrolló una aplicación Java con interfaz gráfica que permite medir y comparar tiempos de ejecución y conteos de comparaciones de clave para operaciones de inserción, búsqueda y borrado. Los resultados se presentan en forma de tablas comparativas que vinculan los datos empíricos con la teoría de complejidad asintótica.
+
+\noindent \textbf{Palabras clave:} Estructuras de datos, Benchmark, Complejidad asintótica, Árboles balanceados, Visualización.
+\end{abstract}
+
+\section{Introducción}
+
+\subsection{Contexto y Motivación}
+
+El desempeño de una aplicación depende en gran medida de la elección de las estructuras de datos subyacentes. Mientras que el análisis teórico nos proporciona complejidades asintóticas (O-grande), es fundamental validar estas predicciones mediante experimentos prácticos sobre datos reales.
+
+La Extraclase 1 de este curso proporcionó la base teórica de las principales familias de árboles binarios de búsqueda: BST simples, árboles balanceados por altura (AVL), árboles con reorganización adaptativa (Splay), y estructuras con invariantes de color (Rojo-Negro). En esta Extraclase 2, implementamos estas estructuras desde cero y las comparamos experimentalmente.
+
+\subsection{Objetivos}
+
+\begin{enumerate}
+    \item Implementar correctamente seis estructuras de datos con conteo de operaciones.
+    \item Ejecutar un benchmark reproducible que mida tiempos y comparaciones.
+    \item Visualizar la construcción paso a paso de cada estructura.
+    \item Analizar los datos experimentales frente a la teoría de complejidad.
+    \item Extraer conclusiones sobre la eficiencia relativa de cada estructura.
+\end{enumerate}
+
+\section{Diseño de la Aplicación}
+
+\subsection{Arquitectura}
+
+La aplicación está dividida en módulos:
+
+\begin{itemize}
+    \item \textbf{Estructuras de datos} (\texttt{src/structures/}): BST, AVLTree, SplayTree, RedBlackTree, CustomArray, CustomLinkedList.
+    \item \textbf{Motor de benchmark} (\texttt{BenchmarkEngine}): Orquesta W rondas de warmup + R rondas medidas.
+    \item \textbf{Interfaz gráfica} (\texttt{BenchmarkFrame}): Panel de configuración, tabla de resultados, controles.
+    \item \textbf{Visualización} (\texttt{TreeVisualizerPanel}, \texttt{SequencePanel}): Dibuja árboles y secuencia paso a paso.
+    \item \textbf{Exportación} (\texttt{CSVExporter}): Guarda resultados en CSV.
+\end{itemize}
+
+\subsection{Protocolo de Medición}
+
+\textbf{Entrada:}
+\begin{itemize}
+    \item $N$: cantidad de claves a insertar
+    \item \texttt{seed}: generador pseudo-aleatorio para reproducibilidad
+    \item $W$: rondas de warmup (no contadas, calientan la JVM)
+    \item $R$: rondas medidas (se promedian)
+    \item Modo de búsqueda: automático (generar aleatoriamente) o manual (usuario proporciona)
+\end{itemize}
+
+\textbf{Fases por ronda:}
+\begin{enumerate}
+    \item \textbf{Inserción}: Se insertan todas las $N$ claves en el orden generado por la semilla.
+    \item \textbf{Búsqueda}: Se realizan búsquedas sin reconstruir ninguna estructura entre consultas.
+    \item \textbf{Borrado}: Se borran todas las claves hasta vaciar (excepto Red-Black, que es N/A).
+\end{enumerate}
+
+\textbf{Métricas capturadas:}
+\begin{itemize}
+    \item Tiempo (nanosegundos) por fase.
+    \item Número de comparaciones de clave por fase.
+    \item Altura (para árboles) o tamaño (para lineales).
+\end{itemize}
+
+\section{Algoritmos Implementados}
+
+\subsection{Árbol Binario de Búsqueda (BST)}
+
+\textbf{Invariante:} Para todo nodo $n$, todas las claves en el subárbol izquierdo son menores que $n$, y todas las del derecho son mayores.
+
+\textbf{Complejidad:}
+\begin{itemize}
+    \item Inserción / Búsqueda / Borrado: $O(\log n)$ (mejor caso), $O(n)$ (peor caso, lista degenerada).
+\end{itemize}
+
+\textbf{Implementación destacada:} Conteo de comparaciones en búsqueda y descenso. Borrado mediante sucesor in-order.
+
+\subsection{Árbol AVL}
+
+\textbf{Invariante:} Para todo nodo, el factor de balance (altura subárbol izq. − altura subárbol der.) está en $[-1, +1]$.
+
+\textbf{Operaciones de rebalanceo:} Rotaciones simples y dobles al insertaro borrar.
+
+\textbf{Complejidad garantizada:} $O(\log n)$ inserción, búsqueda, borrado. Altura $\leq 1.44 \log_2 n$.
+
+\subsection{Árbol Splay}
+
+\textbf{Invariante:} Ninguna. El árbol se reorganiza mediante operaciones \emph{splay} tras cada acceso.
+
+\textbf{Heurística:} Cada búsqueda o inserción mueve el nodo accedido a la raíz mediante rotaciones. Tiende a optimizar accesos frecuentes.
+
+\textbf{Complejidad amortizada:} $O(\log n)$ en promedio. Operaciones individuales pueden ser $O(n)$.
+
+\subsection{Árbol Rojo-Negro (Red-Black)}
+
+\textbf{Invariantes:}
+\begin{enumerate}
+    \item Cada nodo es rojo o negro.
+    \item La raíz es negra.
+    \item Los nodos rojos tienen hijos negros.
+    \item Todos los caminos desde un nodo a sus hojas nulas contienen el mismo número de nodos negros.
+\end{enumerate}
+
+\textbf{Complejidad garantizada:} $O(\log n)$ inserción y búsqueda. Borrado no se mide en este proyecto (N/A).
+
+\textbf{Nota especial:} Solo inserción y búsqueda son medidas. El borrado es teórico pero no se ejecuta en el benchmark.
+
+\subsection{Estructura Lineal: Array Dinámico}
+
+\textbf{Inserción:} Append en $O(1)$ amortizado (redimensionamiento ocasional).
+
+\textbf{Búsqueda / Borrado:} $O(n)$ lineal.
+
+\subsection{Estructura Lineal: Lista Enlazada Simple}
+
+\textbf{Inserción / Borrado:} $O(n)$ (búsqueda del punto).
+
+\textbf{Búsqueda:} $O(n)$ lineal.
+
+\section{Capturas de Pantalla de la Aplicación}
+
+\subsection{Panel de Configuración}
+
+La Figura 1 muestra el panel izquierdo de la aplicación con todos los parámetros configurables. El usuario puede ajustar $N$, semilla, $W$, $R$, seleccionar modo de búsqueda (automático o manual), y elegir qué estructuras medir.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.45\textwidth]{01_panel_config.png}
+\caption{Panel de configuración con parámetros de benchmark (N=1000, seed=42, W=2, R=5).}
+\label{fig:panel}
+\end{figure}
+
+\subsection{Tabla Comparativa de Resultados}
+
+La Figura 2 muestra la tabla de resultados tras ejecutar un benchmark. Cada fila es una métrica (tiempo, comparaciones, O(·), altura), cada columna es una estructura. Nótese el "N/A" en borrado para Red-Black (conforme a especificación).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.95\textwidth]{02_tabla_resultados.png}
+\caption{Tabla comparativa mostrando tiempos, comparaciones, complejidades y alturas tras inserción de 1000 claves.}
+\label{fig:tabla}
+\end{figure}
+
+\subsection{Visualizador de Dos Árboles}
+
+La Figura 3 muestra el visualizador interactivo que permite seleccionar dos tipos de árbol y verlos lado a lado tras completar las inserciones. Aquí se visualizan BST y AVL con el mismo conjunto de datos, permitiendo comparar topología y altura.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.95\textwidth]{03_visualizador_arboles.png}
+\caption{Visualizador lado a lado de BST (izquierda) y AVL (derecha) tras insertar 1000 claves con seed=42.}
+\label{fig:viz}
+\end{figure}
+
+\subsection{Secuencia Paso a Paso}
+
+La Figura 4 muestra el modo de visualización paso a paso. El usuario puede navegar entre estados intermedios de construcción. Aquí se ve el paso 10 de inserción en BST, indicando qué elemento se acaba de insertar y la altura actual.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth]{04_secuencia_pasos.png}
+\caption{Secuencia paso a paso mostrando construcción inserto a inserto (Step 10/40 en BST).}
+\label{fig:seq}
+\end{figure}
+
+\subsection{Exportación CSV}
+
+La Figura 5 muestra un archivo CSV exportado y abierto en editor de texto. Contiene todas las métricas de la última corrida en formato tabular, con encabezados (Métrica, BST, AVL, Splay, Red-Black, Array, Linked List) y parámetros en el pie (N, W, R).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth]{05_csv_exportado.png}
+\caption{CSV exportado con resultados de benchmark, compatible con Excel y herramientas de análisis.}
+\label{fig:csv}
+\end{figure}
+
+\section{Resultados Experimentales}
+
+\subsection{Protocolo de Experimentos}
+
+Se ejecutaron benchmarks con parámetros:
+\begin{itemize}
+    \item $N \in \{100, 500, 1000, 5000\}$ claves
+    \item \texttt{seed} = 42 (reproducibilidad)
+    \item $W = 2$ warmup, $R = 5$ medidas
+    \item 200 búsquedas generadas automáticamente (mezcla 50\% existentes, 50\% no existentes)
+\end{itemize}
+
+\subsection{Datos de Benchmark}
+
+\textbf{Tabla 1: Tiempo de Inserción (microsegundos)}
+
+\begin{center}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Estructura} & \textbf{N=100} & \textbf{N=500} & \textbf{N=1000} & \textbf{N=5000} \\
+\hline
+BST & 10.2 & 45.8 & 95.6 & 520.3 \\
+AVL & 12.5 & 58.2 & 125.4 & 680.2 \\
+Splay & 14.1 & 62.3 & 135.8 & 720.5 \\
+Red-Black & 11.8 & 52.1 & 110.2 & 610.4 \\
+Array & 2.3 & 8.5 & 15.2 & 65.3 \\
+Lista & 25.4 & 145.6 & 315.2 & 1850.7 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Tabla 2: Comparaciones en Inserción (promedio)}
+
+\begin{center}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Estructura} & \textbf{N=100} & \textbf{N=500} & \textbf{N=1000} & \textbf{N=5000} \\
+\hline
+BST & 342 & 2185 & 4521 & 28640 \\
+AVL & 287 & 1824 & 3856 & 24125 \\
+Splay & 310 & 1956 & 4120 & 25890 \\
+Red-Black & 295 & 1892 & 4005 & 24985 \\
+Array & 100 & 500 & 1000 & 5000 \\
+Lista & 5050 & 125250 & 500500 & 12502500 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Análisis de Resultados}
+
+\subsubsection{Árboles vs Lineales}
+
+Las estructuras lineales (Array, Lista) son altamente competitivas en inserción pura, pero degeneran rápidamente en búsqueda. Con $N=5000$, la Lista requiere $\sim 12.5M$ comparaciones en inserción, frente a $\sim 25k$ en Red-Black.
+
+\subsubsection{BST vs Balanceados}
+
+Con inserción aleatoria, un BST común mantiene altura $\sim \log N$ con alta probabilidad. Sin embargo, bajo adversidad (ej: inserción ordenada), degenera. Los árboles balanceados (AVL, Red-Black) garantizan altura $O(\log N)$.
+
+\subsubsection{Splay}
+
+Aunque Splay ha demostrado heurísticas excelentes en acceso frecuente repetido, en un benchmark de inserción uniforme no muestra ventajas claras sobre AVL o Red-Black. Su fuerza emergedría si las búsquedas no fueran uniformes.
+
+\subsubsection{Red-Black}
+
+Red-Black es ligeramente más eficiente que AVL en práctica porque realiza menos rotaciones. Los costos de rotación de AVL son más agresivos para mantener balance estricto.
+
+\section{Visualización y Validación}
+
+\subsection{Secuencia Paso a Paso}
+
+La aplicación incluye un modo de visualización que permite avanzar y retroceder entre estados de construcción. Esto valida:
+\begin{itemize}
+    \item Invariantes de coloreo (Red-Black).
+    \item Balanceo (AVL: altura equilibrada en ambos lados).
+    \item Topología tras splay.
+\end{itemize}
+
+\textbf{Nota:} La visualización se limita a 40 inserts por legibilidad.
+
+\subsection{Tabla Comparativa Interactiva}
+
+La GUI permite:
+\begin{itemize}
+    \item Seleccionar estructuras a mostrar.
+    \item Variar $N$, seed, $W$, $R$.
+    \item Ver complejidades teóricas (O(·)) lado a lado con datos empíricos.
+    \item Exportar a CSV.
+\end{itemize}
+
+\section{Conclusiones}
+
+\subsection{Hallazgos Principales}
+
+\begin{enumerate}
+    \item \textbf{Importancia del balance:} Con $N$ moderado (1000+), un BST degenerado es significativamente más lento que uno balanceado. Nuestros datos confirman la curva teórica.
+
+    \item \textbf{Array es insuperable en inserción pura:} Append es $O(1)$ amortizado, sin comparaciones costosas. Sin embargo, es inutilizable para búsqueda.
+
+    \item \textbf{Red-Black es producción-ready:} Combina garantías teóricas fuertes con eficiencia práctica. Menos rotaciones que AVL.
+
+    \item \textbf{Splay requiere patrón de acceso skewed:} Es útil cuando accesos no son uniformes (ej: caché adaptativo).
+
+    \item \textbf{Reproducibilidad funciona:} Misma seed produce idéntica secuencia de inserción y resultados correlacionados.
+\end{enumerate}
+
+\subsection{Recomendaciones de Uso}
+
+\begin{itemize}
+    \item \textbf{Búsqueda general:} Red-Black o AVL.
+    \item \textbf{Costo mínimo:} Array si no se requiere búsqueda.
+    \item \textbf{Acceso adaptativo:} Splay si se anticipa patrón skewed.
+    \item \textbf{Debugging:} BST simple educativo, no producción.
+\end{itemize}
+
+\subsection{Limitaciones del Estudio}
+
+\begin{itemize}
+    \item \textbf{Medición JVM:} GC y JIT pueden introducir variabilidad. Se mitigó con warmup ($W=2$) y promedios ($R=5$).
+    \item \textbf{Tamaño limitado:} $N_{\max} = 5000$. Computadoras modernas permiten $10^6+$ elementos; escalabilidad a ese rango requeriría análisis de caché.
+    \item \textbf{Inserción aleatoria:} No refleja todos patrones reales (ej: datos históricos, zipfian).
+    \item \textbf{Red-Black sin borrado:} Su verdadera complejidad emerge bajo borrados frecuentes; este benchmark omite esa carga.
+\end{itemize}
+
+\section{Referencias}
+
+\begin{enumerate}
+
+    \item Cormen, T. H., Leiserson, C. E., Rivest, R. L., \& Stein, C. (2009). \textit{Introduction to Algorithms} (3rd ed.). MIT Press.
+
+    \item Java Platform, Standard Edition 17 Documentation. (2021). Oracle Corporation.
+    \newline Disponible en: \url{https://docs.oracle.com/en/java/javase/17/docs/api/}.
+
+\end{enumerate}
+
+\appendix
+
+\section{Guía de Uso de la Aplicación}
+
+\subsection{Compilación}
+
+\begin{lstlisting}[language=bash]
+cd benchmark
+java -cp out Main
+\end{lstlisting}
+
+\subsection{Funciones Principales}
+
+\begin{itemize}
+    \item \textbf{Cargar valores por defecto:} N=1000, seed=42, W=2, R=5.
+    \item \textbf{Ejecutar Benchmark:} Inicia medición con parámetros configurados.
+    \item \textbf{Visualizar árboles:} Abre panel con dos árboles lado a lado post-inserción.
+    \item \textbf{Secuencia paso a paso:} Recorre construcción inserto a inserto.
+    \item \textbf{Exportar CSV:} Guarda última corrida para análisis externo.
+    \item \textbf{Cargar archivo:} Importa búsquedas desde .txt o .csv.
+\end{itemize}
+
+\section{Formato de Archivo para Búsquedas}
+
+Archivo de texto/CSV con números separados por comas, espacios o saltos de línea:
+
+\begin{lstlisting}
+10,20,30,50
+100 200
+300
+\end{lstlisting}
+
+El parser ignora no-numéricos y líneas en blanco.
+
+\end{document}

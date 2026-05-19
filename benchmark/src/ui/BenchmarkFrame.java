@@ -43,7 +43,7 @@ public class BenchmarkFrame extends JFrame {
     public BenchmarkFrame() {
         super("CE-1103 — Benchmark de Estructuras de Datos");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1200, 800);
+        setSize(1080, 720);
         setLocationRelativeTo(null);
         setBackground(new Color(30, 30, 42));
         buildUI();
@@ -56,7 +56,7 @@ public class BenchmarkFrame extends JFrame {
 
         // ---- Left panel (config) ----
         JPanel configPanel = buildConfigPanel();
-        configPanel.setPreferredSize(new Dimension(270, 0));
+        configPanel.setPreferredSize(new Dimension(240, 0));
         add(configPanel, BorderLayout.WEST);
 
         // ---- Center (tabs: table + log) ----
@@ -65,8 +65,8 @@ public class BenchmarkFrame extends JFrame {
         tabs.setForeground(Color.WHITE);
         tabs.setFont(new Font("SansSerif", Font.BOLD, 13));
 
-        tabs.addTab("📊 Results Table", buildResultsPanel());
-        tabs.addTab("📋 Log", buildLogPanel());
+        tabs.addTab("Results Table", buildResultsPanel());
+        tabs.addTab("Log", buildLogPanel());
 
         add(tabs, BorderLayout.CENTER);
 
@@ -118,7 +118,7 @@ public class BenchmarkFrame extends JFrame {
         panel.add(manualSearchRadio);
         panel.add(Box.createVerticalStrut(4));
 
-        manualKeysArea = new JTextArea(4, 18);
+        manualKeysArea = new JTextArea(3, 16);
         manualKeysArea.setBackground(new Color(50, 52, 70));
         manualKeysArea.setForeground(Color.WHITE);
         manualKeysArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
@@ -127,8 +127,24 @@ public class BenchmarkFrame extends JFrame {
         manualKeysArea.setToolTipText("Enter comma or space separated keys");
         JScrollPane keysScroll = new JScrollPane(manualKeysArea);
         keysScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
-        keysScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        keysScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel.add(keysScroll);
+
+        JButton loadFileBtn = new JButton("Cargar archivo");
+        loadFileBtn.setOpaque(true);
+        loadFileBtn.setContentAreaFilled(true);
+        loadFileBtn.setBorderPainted(false);
+        loadFileBtn.setBackground(new Color(100, 120, 160));
+        loadFileBtn.setForeground(Color.WHITE);
+        loadFileBtn.setFocusPainted(false);
+        loadFileBtn.setFont(new Font("SansSerif", Font.BOLD, 11));
+        loadFileBtn.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        loadFileBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        loadFileBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        loadFileBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        loadFileBtn.addActionListener(e -> loadSearchFile());
+        panel.add(Box.createVerticalStrut(3));
+        panel.add(loadFileBtn);
 
         panel.add(Box.createVerticalStrut(10));
 
@@ -141,30 +157,20 @@ public class BenchmarkFrame extends JFrame {
         arrayCheck = addCheck(panel, "Array");
         listCheck  = addCheck(panel, "Lista enlazada");
 
-        panel.add(Box.createVerticalStrut(14));
+        panel.add(Box.createVerticalStrut(10));
 
-        // Buttons
-        JButton defaultsBtn = bigButton("⚡ Cargar valores por defecto", new Color(60, 110, 170));
-        JButton runBtn      = bigButton("▶ Ejecutar Benchmark",          new Color(60, 160, 80));
-        JButton exportBtn   = bigButton("💾 Exportar CSV",               new Color(120, 80, 160));
-        JButton vizBtn      = bigButton("🌳 Visualizar árboles",         new Color(150, 100, 50));
-        JButton seqBtn      = bigButton("🔢 Secuencia paso a paso",      new Color(80, 120, 150));
+        // Buttons — cada uno en su fila, color distintivo
+        JButton defaultsBtn = bigButton("Cargar valores por defecto", new Color(52, 120, 210));
+        JButton runBtn      = bigButton("Ejecutar Benchmark",          new Color(34, 160, 80));
+        JButton exportBtn   = bigButton("Exportar CSV",               new Color(130, 80, 190));
+        JButton vizBtn      = bigButton("Visualizar arboles",         new Color(190, 110, 30));
+        JButton seqBtn      = bigButton("Secuencia paso a paso",      new Color(30, 150, 160));
 
-        defaultsBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        runBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        exportBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        vizBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        seqBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        panel.add(defaultsBtn);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(runBtn);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(exportBtn);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(vizBtn);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(seqBtn);
+        for (JButton b : new JButton[]{defaultsBtn, runBtn, exportBtn, vizBtn, seqBtn}) {
+            b.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.add(b);
+            panel.add(Box.createVerticalStrut(5));
+        }
 
         // Actions
         defaultsBtn.addActionListener(e -> loadDefaults());
@@ -189,7 +195,8 @@ public class BenchmarkFrame extends JFrame {
         resultTable.setForeground(Color.WHITE);
         resultTable.setFont(new Font("Monospaced", Font.PLAIN, 12));
         resultTable.setRowHeight(22);
-        resultTable.getTableHeader().setBackground(new Color(50, 60, 90));
+        Color headerBlue = new Color(45, 95, 175);
+        resultTable.getTableHeader().setBackground(headerBlue);
         resultTable.getTableHeader().setForeground(Color.WHITE);
         resultTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
         resultTable.setGridColor(new Color(60, 65, 85));
@@ -210,6 +217,32 @@ public class BenchmarkFrame extends JFrame {
                     setBackground(row % 2 == 0 ? new Color(35, 38, 52) : new Color(42, 45, 62));
                 }
                 setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+                return this;
+            }
+        });
+
+        // Header con color distinto por columna
+        Color[] colColors = {
+            new Color(45, 55, 90),   // Metrica
+            new Color(30, 100, 160), // BST
+            new Color(20, 130, 100), // AVL
+            new Color(120, 70, 160), // Splay
+            new Color(160, 50, 50),  // Red-Black
+            new Color(140, 100, 20), // Array
+            new Color(20, 110, 130)  // Lista Enlazada
+        };
+        resultTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setForeground(Color.WHITE);
+                setFont(new Font("SansSerif", Font.BOLD, 12));
+                setHorizontalAlignment(CENTER);
+                setOpaque(true);
+                setBackground(column < colColors.length ? colColors[column] : new Color(45, 55, 90));
+                setBorder(BorderFactory.createMatteBorder(0, 0, 2, 1, new Color(60, 65, 95)));
+                setText(value != null ? value.toString() : "");
                 return this;
             }
         });
@@ -394,7 +427,7 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void openVisualizer() {
-        JDialog vizDialog = new JDialog(this, "🌳 Visualizador de Árboles", false);
+        JDialog vizDialog = new JDialog(this, "Visualizador de Arboles", false);
         vizDialog.setSize(1000, 600);
         vizDialog.setLocationRelativeTo(this);
         vizDialog.getContentPane().setBackground(new Color(30, 30, 42));
@@ -415,8 +448,8 @@ public class BenchmarkFrame extends JFrame {
         topPanel.add(vizLabel("Árbol B:"));
         topPanel.add(comboB);
 
-        JButton refreshBtn = new JButton("🔄 Actualizar");
-        styleButton2(refreshBtn, new Color(60, 120, 180));
+        JButton refreshBtn = new JButton("Actualizar");
+        styleButton2(refreshBtn, new Color(55, 130, 220));
         topPanel.add(refreshBtn);
         vizDialog.add(topPanel, BorderLayout.NORTH);
 
@@ -446,6 +479,35 @@ public class BenchmarkFrame extends JFrame {
         SequencePanel seqPanel = new SequencePanel(this);
         seqPanel.setKeys(lastInsertionOrder);
         seqPanel.setVisible(true);
+    }
+
+    private void loadSearchFile() {
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Cargar archivo de búsquedas");
+        fc.setFileFilter(new FileNameExtensionFilter("Text/CSV files", "txt", "csv"));
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                String content = new String(java.nio.file.Files.readAllBytes(fc.getSelectedFile().toPath()));
+                String[] parts = content.split("[,\\s\\n\\r]+");
+                StringBuilder keys = new StringBuilder();
+                for (String part : parts) {
+                    part = part.trim();
+                    if (!part.isEmpty()) {
+                        try {
+                            Integer.parseInt(part);
+                            if (keys.length() > 0) keys.append(" ");
+                            keys.append(part);
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+                manualKeysArea.setText(keys.toString());
+                manualSearchRadio.setSelected(true);
+                log("Archivo cargado: " + fc.getSelectedFile().getName() + " (" + keys.toString().split("\\s+").length + " claves)");
+                setStatus("Búsquedas cargadas del archivo.");
+            } catch (Exception ex) {
+                showError("Error al cargar archivo: " + ex.getMessage());
+            }
+        }
     }
 
     // ---- Helpers ----
@@ -513,7 +575,7 @@ public class BenchmarkFrame extends JFrame {
     private JTextField addField(JPanel panel, String labelText, String defaultValue) {
         JLabel lbl = new JLabel(labelText);
         lbl.setForeground(new Color(180, 185, 210));
-        lbl.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        lbl.setFont(new Font("SansSerif", Font.PLAIN, 11));
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(lbl);
 
@@ -521,19 +583,20 @@ public class BenchmarkFrame extends JFrame {
         field.setBackground(new Color(50, 52, 72));
         field.setForeground(Color.WHITE);
         field.setCaretColor(Color.WHITE);
-        field.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        field.setFont(new Font("Monospaced", Font.PLAIN, 12));
         field.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(80, 85, 115)),
             BorderFactory.createEmptyBorder(3, 6, 3, 6)));
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
         field.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(field);
-        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(4));
         return field;
     }
 
     private JCheckBox addCheck(JPanel panel, String label) {
         JCheckBox cb = new JCheckBox(label, true);
+        cb.setOpaque(true);
         cb.setBackground(new Color(38, 38, 52));
         cb.setForeground(new Color(200, 210, 240));
         cb.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -553,17 +616,21 @@ public class BenchmarkFrame extends JFrame {
 
     private JButton bigButton(String text, Color bg) {
         JButton btn = new JButton(text);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 12));
-        btn.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        btn.setFont(new Font("SansSerif", Font.BOLD, 11));
+        btn.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
     private void styleRadio(JRadioButton rb) {
+        rb.setOpaque(true);
         rb.setBackground(new Color(38, 38, 52));
         rb.setForeground(new Color(200, 210, 240));
         rb.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -584,6 +651,9 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void styleButton2(JButton btn, Color bg) {
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
         btn.setBackground(bg);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
@@ -591,3 +661,6 @@ public class BenchmarkFrame extends JFrame {
         btn.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
     }
 }
+
+
+
