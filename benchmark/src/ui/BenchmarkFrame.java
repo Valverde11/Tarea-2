@@ -62,11 +62,11 @@ public class BenchmarkFrame extends JFrame {
         // ---- Center (tabs: table + log) ----
         JTabbedPane tabs = new JTabbedPane();
         tabs.setBackground(new Color(40, 40, 55));
-        tabs.setForeground(Color.BLACK);
+        tabs.setForeground(Color.WHITE);
         tabs.setFont(new Font("SansSerif", Font.BOLD, 13));
 
-        tabs.addTab("📊 Results Table", buildResultsPanel());
-        tabs.addTab("📋 Log", buildLogPanel());
+        tabs.addTab("Results Table", buildResultsPanel());
+        tabs.addTab("Log", buildLogPanel());
 
         add(tabs, BorderLayout.CENTER);
 
@@ -130,7 +130,7 @@ public class BenchmarkFrame extends JFrame {
         keysScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         panel.add(keysScroll);
 
-        JButton loadFileBtn = new JButton("📁 Cargar archivo");
+        JButton loadFileBtn = new JButton("Cargar archivo");
         loadFileBtn.setOpaque(true);
         loadFileBtn.setContentAreaFilled(true);
         loadFileBtn.setBorderPainted(false);
@@ -159,25 +159,18 @@ public class BenchmarkFrame extends JFrame {
 
         panel.add(Box.createVerticalStrut(10));
 
-        // Buttons
-        Color buttonBlue = new Color(55, 130, 220);
-        JButton defaultsBtn = bigButton("⚡ Valores por defecto", buttonBlue);
-        JButton runBtn      = bigButton("▶ Ejecutar",              buttonBlue);
-        JButton exportBtn   = bigButton("💾 Exportar CSV",           buttonBlue);
-        JButton vizBtn      = bigButton("🌳 Visualizar",            buttonBlue);
-        JButton seqBtn      = bigButton("🔢 Paso a paso",           buttonBlue);
+        // Buttons — cada uno en su fila, color distintivo
+        JButton defaultsBtn = bigButton("Cargar valores por defecto", new Color(52, 120, 210));
+        JButton runBtn      = bigButton("Ejecutar Benchmark",          new Color(34, 160, 80));
+        JButton exportBtn   = bigButton("Exportar CSV",               new Color(130, 80, 190));
+        JButton vizBtn      = bigButton("Visualizar arboles",         new Color(190, 110, 30));
+        JButton seqBtn      = bigButton("Secuencia paso a paso",      new Color(30, 150, 160));
 
-        JPanel actionsPanel = new JPanel(new GridLayout(0, 2, 6, 6));
-        actionsPanel.setBackground(panel.getBackground());
-        actionsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        actionsPanel.add(defaultsBtn);
-        actionsPanel.add(runBtn);
-        actionsPanel.add(exportBtn);
-        actionsPanel.add(vizBtn);
-        actionsPanel.add(seqBtn);
-
-        panel.add(actionsPanel);
-        panel.add(Box.createVerticalStrut(6));
+        for (JButton b : new JButton[]{defaultsBtn, runBtn, exportBtn, vizBtn, seqBtn}) {
+            b.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.add(b);
+            panel.add(Box.createVerticalStrut(5));
+        }
 
         // Actions
         defaultsBtn.addActionListener(e -> loadDefaults());
@@ -202,9 +195,9 @@ public class BenchmarkFrame extends JFrame {
         resultTable.setForeground(Color.WHITE);
         resultTable.setFont(new Font("Monospaced", Font.PLAIN, 12));
         resultTable.setRowHeight(22);
-        Color headerBlue = new Color(55, 130, 220);
+        Color headerBlue = new Color(45, 95, 175);
         resultTable.getTableHeader().setBackground(headerBlue);
-        resultTable.getTableHeader().setForeground(Color.BLACK);
+        resultTable.getTableHeader().setForeground(Color.WHITE);
         resultTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
         resultTable.setGridColor(new Color(60, 65, 85));
         resultTable.setSelectionBackground(new Color(70, 90, 140));
@@ -224,6 +217,32 @@ public class BenchmarkFrame extends JFrame {
                     setBackground(row % 2 == 0 ? new Color(35, 38, 52) : new Color(42, 45, 62));
                 }
                 setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+                return this;
+            }
+        });
+
+        // Header con color distinto por columna
+        Color[] colColors = {
+            new Color(45, 55, 90),   // Metrica
+            new Color(30, 100, 160), // BST
+            new Color(20, 130, 100), // AVL
+            new Color(120, 70, 160), // Splay
+            new Color(160, 50, 50),  // Red-Black
+            new Color(140, 100, 20), // Array
+            new Color(20, 110, 130)  // Lista Enlazada
+        };
+        resultTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setForeground(Color.WHITE);
+                setFont(new Font("SansSerif", Font.BOLD, 12));
+                setHorizontalAlignment(CENTER);
+                setOpaque(true);
+                setBackground(column < colColors.length ? colColors[column] : new Color(45, 55, 90));
+                setBorder(BorderFactory.createMatteBorder(0, 0, 2, 1, new Color(60, 65, 95)));
+                setText(value != null ? value.toString() : "");
                 return this;
             }
         });
@@ -408,7 +427,7 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void openVisualizer() {
-        JDialog vizDialog = new JDialog(this, "🌳 Visualizador de Árboles", false);
+        JDialog vizDialog = new JDialog(this, "Visualizador de Arboles", false);
         vizDialog.setSize(1000, 600);
         vizDialog.setLocationRelativeTo(this);
         vizDialog.getContentPane().setBackground(new Color(30, 30, 42));
@@ -429,7 +448,7 @@ public class BenchmarkFrame extends JFrame {
         topPanel.add(vizLabel("Árbol B:"));
         topPanel.add(comboB);
 
-        JButton refreshBtn = new JButton("🔄 Actualizar");
+        JButton refreshBtn = new JButton("Actualizar");
         styleButton2(refreshBtn, new Color(55, 130, 220));
         topPanel.add(refreshBtn);
         vizDialog.add(topPanel, BorderLayout.NORTH);
@@ -577,6 +596,7 @@ public class BenchmarkFrame extends JFrame {
 
     private JCheckBox addCheck(JPanel panel, String label) {
         JCheckBox cb = new JCheckBox(label, true);
+        cb.setOpaque(true);
         cb.setBackground(new Color(38, 38, 52));
         cb.setForeground(new Color(200, 210, 240));
         cb.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -610,6 +630,7 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void styleRadio(JRadioButton rb) {
+        rb.setOpaque(true);
         rb.setBackground(new Color(38, 38, 52));
         rb.setForeground(new Color(200, 210, 240));
         rb.setFont(new Font("SansSerif", Font.PLAIN, 12));
