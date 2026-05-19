@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[utf-8]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
 \usepackage{geometry}
 \geometry{margin=2cm}
@@ -147,6 +147,63 @@ La aplicación está dividida en módulos:
 
 \textbf{Búsqueda:} $O(n)$ lineal.
 
+\section{Capturas de Pantalla de la Aplicación}
+
+\subsection{Panel de Configuración}
+
+La Figura 1 muestra el panel izquierdo de la aplicación con todos los parámetros configurables. El usuario puede ajustar $N$, semilla, $W$, $R$, seleccionar modo de búsqueda (automático o manual), y elegir qué estructuras medir.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.45\textwidth]{01_panel_config.png}
+\caption{Panel de configuración con parámetros de benchmark (N=1000, seed=42, W=2, R=5).}
+\label{fig:panel}
+\end{figure}
+
+\subsection{Tabla Comparativa de Resultados}
+
+La Figura 2 muestra la tabla de resultados tras ejecutar un benchmark. Cada fila es una métrica (tiempo, comparaciones, O(·), altura), cada columna es una estructura. Nótese el "N/A" en borrado para Red-Black (conforme a especificación).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.95\textwidth]{02_tabla_resultados.png}
+\caption{Tabla comparativa mostrando tiempos, comparaciones, complejidades y alturas tras inserción de 1000 claves.}
+\label{fig:tabla}
+\end{figure}
+
+\subsection{Visualizador de Dos Árboles}
+
+La Figura 3 muestra el visualizador interactivo que permite seleccionar dos tipos de árbol y verlos lado a lado tras completar las inserciones. Aquí se visualizan BST y AVL con el mismo conjunto de datos, permitiendo comparar topología y altura.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.95\textwidth]{03_visualizador_arboles.png}
+\caption{Visualizador lado a lado de BST (izquierda) y AVL (derecha) tras insertar 1000 claves con seed=42.}
+\label{fig:viz}
+\end{figure}
+
+\subsection{Secuencia Paso a Paso}
+
+La Figura 4 muestra el modo de visualización paso a paso. El usuario puede navegar entre estados intermedios de construcción. Aquí se ve el paso 10 de inserción en BST, indicando qué elemento se acaba de insertar y la altura actual.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth]{04_secuencia_pasos.png}
+\caption{Secuencia paso a paso mostrando construcción inserto a inserto (Step 10/40 en BST).}
+\label{fig:seq}
+\end{figure}
+
+\subsection{Exportación CSV}
+
+La Figura 5 muestra un archivo CSV exportado y abierto en editor de texto. Contiene todas las métricas de la última corrida en formato tabular, con encabezados (Métrica, BST, AVL, Splay, Red-Black, Array, Linked List) y parámetros en el pie (N, W, R).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.85\textwidth]{05_csv_exportado.png}
+\caption{CSV exportado con resultados de benchmark, compatible con Excel y herramientas de análisis.}
+\label{fig:csv}
+\end{figure}
+
 \section{Resultados Experimentales}
 
 \subsection{Protocolo de Experimentos}
@@ -273,15 +330,12 @@ La GUI permite:
 \section{Referencias}
 
 \begin{enumerate}
+
     \item Cormen, T. H., Leiserson, C. E., Rivest, R. L., \& Stein, C. (2009). \textit{Introduction to Algorithms} (3rd ed.). MIT Press.
 
-    \item Knuth, D. E. (1998). \textit{The Art of Computer Programming: Volume 3, Sorting and Searching} (2nd ed.). Addison-Wesley.
+    \item Java Platform, Standard Edition 17 Documentation. (2021). Oracle Corporation.
+    \newline Disponible en: \url{https://docs.oracle.com/en/java/javase/17/docs/api/}.
 
-    \item Sleator, D. D., \& Tarjan, R. E. (1985). Self-adjusting binary search trees. \textit{Journal of the ACM, 32}(3), 652--686.
-
-    \item \textit{Java Platform, Standard Edition 17 Documentation}. Disponible en: \url{https://docs.oracle.com/en/java/javase/17/}
-
-    \item Proyecto CE-1103 — Algoritmos y Estructuras de Datos I, TEC 2026-S1.
 \end{enumerate}
 
 \appendix
@@ -292,7 +346,6 @@ La GUI permite:
 
 \begin{lstlisting}[language=bash]
 cd benchmark
-javac --release 17 -d out src/Main.java src/**/*.java
 java -cp out Main
 \end{lstlisting}
 
