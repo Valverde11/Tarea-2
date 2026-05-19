@@ -130,6 +130,22 @@ public class BenchmarkFrame extends JFrame {
         keysScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
         panel.add(keysScroll);
 
+        JButton loadFileBtn = new JButton("📁 Cargar archivo");
+        loadFileBtn.setOpaque(true);
+        loadFileBtn.setContentAreaFilled(true);
+        loadFileBtn.setBorderPainted(false);
+        loadFileBtn.setBackground(new Color(100, 120, 160));
+        loadFileBtn.setForeground(Color.WHITE);
+        loadFileBtn.setFocusPainted(false);
+        loadFileBtn.setFont(new Font("SansSerif", Font.BOLD, 11));
+        loadFileBtn.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        loadFileBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        loadFileBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        loadFileBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        loadFileBtn.addActionListener(e -> loadSearchFile());
+        panel.add(Box.createVerticalStrut(3));
+        panel.add(loadFileBtn);
+
         panel.add(Box.createVerticalStrut(10));
 
         // Structures
@@ -448,6 +464,35 @@ public class BenchmarkFrame extends JFrame {
         SequencePanel seqPanel = new SequencePanel(this);
         seqPanel.setKeys(lastInsertionOrder);
         seqPanel.setVisible(true);
+    }
+
+    private void loadSearchFile() {
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Cargar archivo de búsquedas");
+        fc.setFileFilter(new FileNameExtensionFilter("Text/CSV files", "txt", "csv"));
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                String content = new String(java.nio.file.Files.readAllBytes(fc.getSelectedFile().toPath()));
+                String[] parts = content.split("[,\\s\\n\\r]+");
+                StringBuilder keys = new StringBuilder();
+                for (String part : parts) {
+                    part = part.trim();
+                    if (!part.isEmpty()) {
+                        try {
+                            Integer.parseInt(part);
+                            if (keys.length() > 0) keys.append(" ");
+                            keys.append(part);
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+                manualKeysArea.setText(keys.toString());
+                manualSearchRadio.setSelected(true);
+                log("Archivo cargado: " + fc.getSelectedFile().getName() + " (" + keys.toString().split("\\s+").length + " claves)");
+                setStatus("Búsquedas cargadas del archivo.");
+            } catch (Exception ex) {
+                showError("Error al cargar archivo: " + ex.getMessage());
+            }
+        }
     }
 
     // ---- Helpers ----
