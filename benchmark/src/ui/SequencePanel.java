@@ -1,11 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Shows step-by-step insertion sequence for a chosen structure.
- * Each step re-builds the structure with the first i keys and draws it.
- * No java.util.* used.
- */
+
 public class SequencePanel extends JDialog {
 
     private String structureType = "BST";

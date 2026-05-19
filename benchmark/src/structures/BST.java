@@ -1,9 +1,5 @@
 
-/**
- * Binary Search Tree (BST) implementation.
- * Supports insert, search, delete with comparison counting.
- * Based on CE-1103 Lesson 05 - Hierarchical Data Structures.
- */
+
 public class BST {
     private BSTNode root;
     private long comparisons;

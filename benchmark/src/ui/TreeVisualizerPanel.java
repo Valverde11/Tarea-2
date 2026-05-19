@@ -1,11 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Panel that renders two trees side by side using canvas drawing.
- * Supports BST, AVL, Splay, Red-Black.
- * No java.util.* used.
- */
+
 public class TreeVisualizerPanel extends JPanel {
 
     private String treeAType = "BST";
