@@ -1,75 +1,60 @@
-
-
-
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
 
 /**
  * Exports benchmark results to CSV format.
+ * No java.util.* used.
  */
 public class CSVExporter {
 
-    public static String toCSV(List<BenchmarkResult> results, int N, int W, int R) {
+    public static String toCSV(BenchmarkEngine.ResultList results, int N, int W, int R) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
-        // Header
         pw.print("Metric");
-        for (BenchmarkResult r : results) pw.print("," + r.structureName);
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).structureName);
         pw.println();
 
-        // Insert time
         pw.print("Insert Time");
-        for (BenchmarkResult r : results) pw.print("," + r.formatTime(r.insertTimeNs));
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).formatTime(results.get(i).insertTimeNs));
         pw.println();
 
-        // Search time
         pw.print("Search Time");
-        for (BenchmarkResult r : results) pw.print("," + r.formatTime(r.searchTimeNs));
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).formatTime(results.get(i).searchTimeNs));
         pw.println();
 
-        // Delete time
         pw.print("Delete Time");
-        for (BenchmarkResult r : results) pw.print("," + r.formatTime(r.deleteTimeNs));
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).formatTime(results.get(i).deleteTimeNs));
         pw.println();
 
-        // Insert comparisons
         pw.print("Insert Comparisons");
-        for (BenchmarkResult r : results) pw.print("," + r.formatComparisons(r.insertComparisons));
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).formatComparisons(results.get(i).insertComparisons));
         pw.println();
 
-        // Search comparisons
         pw.print("Search Comparisons");
-        for (BenchmarkResult r : results) pw.print("," + r.formatComparisons(r.searchComparisons));
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).formatComparisons(results.get(i).searchComparisons));
         pw.println();
 
-        // Delete comparisons
         pw.print("Delete Comparisons");
-        for (BenchmarkResult r : results) pw.print("," + r.formatComparisons(r.deleteComparisons));
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).formatComparisons(results.get(i).deleteComparisons));
         pw.println();
 
-        // Insert complexity
         pw.print("Insert O()");
-        for (BenchmarkResult r : results) pw.print("," + r.insertComplexity);
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).insertComplexity);
         pw.println();
 
-        // Search complexity
         pw.print("Search O()");
-        for (BenchmarkResult r : results) pw.print("," + r.searchComplexity);
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).searchComplexity);
         pw.println();
 
-        // Delete complexity
         pw.print("Delete O()");
-        for (BenchmarkResult r : results) pw.print("," + r.deleteComplexity);
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).deleteComplexity);
         pw.println();
 
-        // Height/size
         pw.print("Height/Size");
-        for (BenchmarkResult r : results) pw.print("," + r.heightOrSize);
+        for (int i = 0; i < results.size(); i++) pw.print("," + results.get(i).heightOrSize);
         pw.println();
 
         pw.println();
@@ -78,7 +63,7 @@ public class CSVExporter {
         return sw.toString();
     }
 
-    public static void saveToFile(String path, List<BenchmarkResult> results, int N, int W, int R) throws IOException {
+    public static void saveToFile(String path, BenchmarkEngine.ResultList results, int N, int W, int R) throws IOException {
         try (FileWriter fw = new FileWriter(path)) {
             fw.write(toCSV(results, N, W, R));
         }

@@ -1,24 +1,28 @@
-
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Shows step-by-step insertion sequence for a chosen structure.
- * User can advance/rewind through each insertion step.
+ * Each step re-builds the structure with the first i keys and draws it.
+ * No java.util.* used.
  */
 public class SequencePanel extends JDialog {
 
     private String structureType = "BST";
     private int[] keys;
     private int currentStep = 0;
+    private int totalSteps  = 0;
+    private int keyLimit    = 40; // max steps for visualization
 
-    private TreeVisualizerPanel treePanel;
+    private StepTreePanel drawPanel;
     private JLabel stepLabel;
     private JButton prevBtn, nextBtn;
-
-    // Snapshots: one per insertion
-    private SnapshotMatrix snapshots = new SnapshotMatrix();
     private StringArray stepDescriptions = new StringArray();
+
+    // Parallel arrays that store partial snapshots for each step
+    private SnapshotMatrix snapshots = new SnapshotMatrix();
+    // For Red-Black we need to know which nodes are red; store color separately
+    private SnapshotMatrix rbColorSnapshots = new SnapshotMatrix(); // not used directly; color embedded in snapshot
 
     public SequencePanel(JFrame parent) {
         super(parent, "Paso a Paso / Step-by-Step", true);
@@ -45,10 +49,13 @@ public class SequencePanel extends JDialog {
         topPanel.add(loadBtn);
         add(topPanel, BorderLayout.NORTH);
 
-        // Tree visualization (center)
-        treePanel = new TreeVisualizerPanel();
-        treePanel.setPreferredSize(new Dimension(880, 420));
-        add(treePanel, BorderLayout.CENTER);
+        // Drawing panel
+        drawPanel = new StepTreePanel();
+        drawPanel.setPreferredSize(new Dimension(880, 440));
+        JScrollPane scrollPane = new JScrollPane(drawPanel);
+        scrollPane.setBackground(new Color(30, 30, 40));
+        scrollPane.getViewport().setBackground(new Color(30, 30, 40));
+        add(scrollPane, BorderLayout.CENTER);
 
         // Bottom navigation
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 8));
@@ -67,7 +74,6 @@ public class SequencePanel extends JDialog {
         bottomPanel.add(nextBtn);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // Actions
         loadBtn.addActionListener(e -> loadSequence((String) typeCombo.getSelectedItem()));
         prevBtn.addActionListener(e -> step(-1));
         nextBtn.addActionListener(e -> step(1));
@@ -88,112 +94,177 @@ public class SequencePanel extends JDialog {
             return;
         }
 
-        // Build snapshots step by step
+        int limit = Math.min(keys.length, keyLimit);
+
         if (type.equals("Array") || type.equals("Linked List")) {
-            buildLinearSnapshots(type);
+            buildLinearSnapshots(type, limit);
         } else {
-            buildTreeSnapshots(type);
+            buildTreeSnapshots(type, limit);
         }
 
+        totalSteps = snapshots.size();
         updateDisplay();
     }
 
-    private void buildTreeSnapshots(String type) {
-        BST bst = type.equals("BST") ? new BST() : null;
-        AVLTree avl = type.equals("AVL") ? new AVLTree() : null;
-        SplayTree splay = type.equals("Splay") ? new SplayTree() : null;
-        RedBlackTree rb = type.equals("Red-Black") ? new RedBlackTree() : null;
-
-        int limit = Math.min(keys.length, 40); // cap at 40 for visualization
+    /**
+     * For each step i (0..limit-1), inserts keys[0..i] into a fresh tree
+     * and captures the snapshot. This ensures each step shows the correct partial tree.
+     */
+    private void buildTreeSnapshots(String type, int limit) {
         for (int i = 0; i < limit; i++) {
-            int v = keys[i];
-            if (bst != null)   bst.insert(v);
-            if (avl != null)   avl.insert(v);
-            if (splay != null) splay.insert(v);
-            if (rb != null)    rb.insert(v);
+            // Build fresh tree with keys[0..i]
+            BST bst       = type.equals("BST")        ? new BST()          : null;
+            AVLTree avl   = type.equals("AVL")        ? new AVLTree()       : null;
+            SplayTree sp  = type.equals("Splay")      ? new SplayTree()     : null;
+            RedBlackTree rb = type.equals("Red-Black") ? new RedBlackTree() : null;
 
-            SnapshotArray snap = null;
-            if (bst != null)   snap = bst.getSnapshot();
-            if (avl != null)   snap = avl.getSnapshot();
-            if (splay != null) snap = splay.getSnapshot();
-            if (rb != null)    snap = rb.getSnapshot();
+            for (int j = 0; j <= i; j++) {
+                int v = keys[j];
+                if (bst != null) bst.insert(v);
+                if (avl != null) avl.insert(v);
+                if (sp  != null) sp.insert(v);
+                if (rb  != null) rb.insert(v);
+            }
+
+            SnapshotArray snap;
+            int height;
+            if (bst != null) { snap = bst.getSnapshot(); height = bst.getHeight(); }
+            else if (avl != null) { snap = avl.getSnapshot(); height = avl.getHeight(); }
+            else if (sp != null)  { snap = sp.getSnapshot();  height = sp.getHeight(); }
+            else                  { snap = rb.getSnapshot();  height = rb.getHeight(); }
 
             snapshots.add(snap);
-            stepDescriptions.add("Step " + (i + 1) + ": inserted " + v + " | Height: " + getHeight(type, bst, avl, splay, rb));
+            stepDescriptions.add("Step " + (i + 1) + ": inserted " + keys[i] + " | Height: " + height);
         }
-
-        // Store final trees in treePanel
-        treePanel.setTrees(bst, avl, splay, rb);
-        treePanel.setTreeTypes(type, type);
     }
 
-    private int getHeight(String type, BST bst, AVLTree avl, SplayTree splay, RedBlackTree rb) {
-        return switch (type) {
-            case "BST" -> bst != null ? bst.getHeight() : -1;
-            case "AVL" -> avl != null ? avl.getHeight() : -1;
-            case "Splay" -> splay != null ? splay.getHeight() : -1;
-            case "Red-Black" -> rb != null ? rb.getHeight() : -1;
-            default -> -1;
-        };
-    }
-
-    private void buildLinearSnapshots(String type) {
-        // For linear structures show text-based steps
-        int limit = Math.min(keys.length, 40);
+    private void buildLinearSnapshots(String type, int limit) {
         for (int i = 0; i < limit; i++) {
-            snapshots.add(new SnapshotArray()); // empty tree snapshot
-            StringBuilder sb = new StringBuilder("Step " + (i + 1) + ": inserted " + keys[i] + " | ");
-            sb.append(type).append(" (linear) — size: ").append(i + 1);
-            if (i > 0) {
-                sb.append(" | prev elements: ");
-                int show = Math.min(i, 5);
-                for (int j = i - show; j <= i; j++) sb.append(keys[j]).append(" ");
-            }
+            // Empty snapshot (no tree to draw) — description carries info
+            snapshots.add(new SnapshotArray());
+            StringBuilder sb = new StringBuilder();
+            sb.append("Step ").append(i + 1).append(": inserted ").append(keys[i]);
+            sb.append(" | ").append(type).append(" size: ").append(i + 1);
+            sb.append(" | últimos: ");
+            int show = Math.min(i + 1, 8);
+            for (int j = i + 1 - show; j <= i; j++) sb.append(keys[j]).append(" ");
             stepDescriptions.add(sb.toString());
         }
     }
 
     private void step(int delta) {
-        if (snapshots.isEmpty()) return;
-        currentStep = Math.max(0, Math.min(currentStep + delta, snapshots.size() - 1));
+        if (totalSteps == 0) return;
+        currentStep = Math.max(0, Math.min(currentStep + delta, totalSteps - 1));
         updateDisplay();
     }
 
     private void updateDisplay() {
-        if (snapshots.isEmpty()) {
+        if (totalSteps == 0) {
             stepLabel.setText("No steps loaded");
             return;
         }
-        int total = snapshots.size();
-        stepLabel.setText("Step " + (currentStep + 1) + " / " + total + "  —  " + stepDescriptions.get(currentStep));
+        stepLabel.setText("Step " + (currentStep + 1) + " / " + totalSteps
+                + "  —  " + stepDescriptions.get(currentStep));
         prevBtn.setEnabled(currentStep > 0);
-        nextBtn.setEnabled(currentStep < total - 1);
+        nextBtn.setEnabled(currentStep < totalSteps - 1);
 
-        // Repaint tree with snapshot at currentStep
         SnapshotArray snap = snapshots.get(currentStep);
-        repaintSingleSnapshot(snap);
+        boolean isRB = structureType.equals("Red-Black");
+        boolean isLinear = structureType.equals("Array") || structureType.equals("Linked List");
+        drawPanel.setSnapshot(snap, structureType, isRB, isLinear,
+                stepDescriptions.get(currentStep));
+        drawPanel.repaint();
     }
 
-    private void repaintSingleSnapshot(SnapshotArray snap) {
-        // We re-draw the treePanel with only the partial snapshot
-        // Use a custom approach: override the left panel with the step snapshot
-        treePanel.setTrees(null, null, null, null);
-        // Draw both sides with the same partial snapshot via a simple approach
-        treePanel.repaint();
+    // ---- Inner panel that draws the tree for a single snapshot ----
+    private static class StepTreePanel extends JPanel {
+        private SnapshotArray snapshot;
+        private String label = "";
+        private boolean isRB = false;
+        private boolean isLinear = false;
+        private String description = "";
 
-        // Actually let's create a custom draw by extending the concept:
-        // The treePanel will just show the current snapshot in both halves labeled correctly
-        // We'll subclass or use a simpler single-tree painter
-        SwingUtilities.invokeLater(() -> {
-            // Force single-tree display by creating minimal BST from snapshot
-            // This is a display hack: rebuild BST from snapshot keys in order
-            if (!structureType.equals("Array") && !structureType.equals("Linked List") && snap != null && !snap.isEmpty()) {
-                // snapshot is in pre-order (root first), so re-building a minimal display BST
-                // For correct display just reuse the final tree's snapshot trimmed to step
-                // We annotate the current node as highlighted
+        StepTreePanel() {
+            setBackground(new Color(30, 30, 40));
+        }
+
+        void setSnapshot(SnapshotArray snap, String lbl, boolean rb, boolean linear, String desc) {
+            this.snapshot    = snap;
+            this.label       = lbl;
+            this.isRB        = rb;
+            this.isLinear    = linear;
+            this.description = desc;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int w = getWidth(), h = getHeight();
+
+            // Title
+            g2.setColor(new Color(180, 200, 255));
+            g2.setFont(new Font("SansSerif", Font.BOLD, 15));
+            g2.drawString(label, 12, 22);
+
+            if (isLinear || snapshot == null || snapshot.isEmpty()) {
+                g2.setColor(new Color(150, 180, 150));
+                g2.setFont(new Font("SansSerif", Font.ITALIC, 13));
+                g2.drawString("(estructura lineal — ver descripción abajo)", 12, h / 2);
+                return;
             }
-            treePanel.repaint();
-        });
+
+            // Compute layout
+            int maxDepth = 0;
+            for (int i = 0; i < snapshot.size(); i++) {
+                int d = snapshot.get(i)[1];
+                if (d > maxDepth) maxDepth = d;
+            }
+
+            int vSpacing  = Math.max(40, (h - 60) / (maxDepth + 1));
+            int nodeRadius = 16;
+            int[] xs = new int[snapshot.size()];
+            int[] ys = new int[snapshot.size()];
+
+            for (int i = 0; i < snapshot.size(); i++) {
+                int[] n = snapshot.get(i);
+                int depth = n[1], pos = n[2];
+                int slots = 1 << depth;
+                double slotWidth = (double) w / (slots + 1);
+                xs[i] = (int)(slotWidth * (pos + 1));
+                ys[i] = 35 + depth * vSpacing;
+            }
+
+            // Edges
+            g2.setStroke(new BasicStroke(1.5f));
+            for (int i = 1; i < snapshot.size(); i++) {
+                int parentIdx = snapshot.get(i)[3];
+                g2.setColor(new Color(100, 130, 170));
+                g2.drawLine(xs[parentIdx], ys[parentIdx], xs[i], ys[i]);
+            }
+
+            // Nodes
+            for (int i = 0; i < snapshot.size(); i++) {
+                int[] n = snapshot.get(i);
+                boolean isRed = isRB && n.length > 5 && n[5] == 1;
+                Color fill   = isRed ? new Color(200, 60, 60)  : new Color(50, 100, 180);
+                Color border = isRed ? new Color(255, 120, 120) : new Color(100, 160, 255);
+
+                g2.setColor(fill);
+                g2.fillOval(xs[i] - nodeRadius, ys[i] - nodeRadius, nodeRadius * 2, nodeRadius * 2);
+                g2.setColor(border);
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawOval(xs[i] - nodeRadius, ys[i] - nodeRadius, nodeRadius * 2, nodeRadius * 2);
+
+                g2.setColor(Color.WHITE);
+                g2.setFont(new Font("SansSerif", Font.BOLD, 10));
+                String lbl2 = String.valueOf(n[0]);
+                FontMetrics fm = g2.getFontMetrics();
+                g2.drawString(lbl2, xs[i] - fm.stringWidth(lbl2) / 2, ys[i] + 4);
+            }
+        }
     }
 
     // ---- Styling helpers ----
@@ -205,12 +276,8 @@ public class SequencePanel extends JDialog {
     }
 
     private void styleButton(JButton btn, Color bg) {
-        btn.setOpaque(true);
-        btn.setContentAreaFilled(true);
-        btn.setBorderPainted(false);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
+        btn.setOpaque(true); btn.setContentAreaFilled(true); btn.setBorderPainted(false);
+        btn.setBackground(bg); btn.setForeground(Color.WHITE); btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 12));
         btn.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
     }

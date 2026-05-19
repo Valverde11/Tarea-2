@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -6,11 +5,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.io.File;
-import java.util.List;
 
 /**
  * Main application window for the benchmark.
  * CE-1103 Extraclase 2 — BST, AVL, Splay, Red-Black, Array, Linked List benchmark.
+ * NOTE: No java.util.List used. Uses BenchmarkEngine.ResultList.
  */
 public class BenchmarkFrame extends JFrame {
 
@@ -29,7 +28,7 @@ public class BenchmarkFrame extends JFrame {
     private JTextArea logArea;
 
     // Last run data
-    private List<BenchmarkResult> lastResults;
+    private BenchmarkEngine.ResultList lastResults;
     private int[] lastInsertionOrder;
     private int[] lastSearchKeys;
     private BenchmarkEngine.Config lastConfig;
@@ -45,7 +44,6 @@ public class BenchmarkFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1080, 720);
         setLocationRelativeTo(null);
-        setBackground(new Color(30, 30, 42));
         buildUI();
         loadDefaults();
     }
@@ -54,23 +52,18 @@ public class BenchmarkFrame extends JFrame {
         getContentPane().setBackground(new Color(30, 30, 42));
         setLayout(new BorderLayout(8, 8));
 
-        // ---- Left panel (config) ----
         JPanel configPanel = buildConfigPanel();
         configPanel.setPreferredSize(new Dimension(240, 0));
         add(configPanel, BorderLayout.WEST);
 
-        // ---- Center (tabs: table + log) ----
         JTabbedPane tabs = new JTabbedPane();
         tabs.setBackground(new Color(40, 40, 55));
         tabs.setForeground(Color.WHITE);
         tabs.setFont(new Font("SansSerif", Font.BOLD, 13));
-
         tabs.addTab("Results Table", buildResultsPanel());
         tabs.addTab("Log", buildLogPanel());
-
         add(tabs, BorderLayout.CENTER);
 
-        // ---- Bottom status ----
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         statusPanel.setBackground(new Color(25, 25, 35));
         statusLabel = new JLabel("Ready. Load defaults or configure and run.");
@@ -86,7 +79,6 @@ public class BenchmarkFrame extends JFrame {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(new EmptyBorder(12, 10, 10, 10));
 
-        // Title
         JLabel title = new JLabel("Configuración");
         title.setForeground(new Color(160, 190, 255));
         title.setFont(new Font("SansSerif", Font.BOLD, 16));
@@ -94,20 +86,18 @@ public class BenchmarkFrame extends JFrame {
         panel.add(title);
         panel.add(Box.createVerticalStrut(10));
 
-        // Parameters
         panel.add(sectionLabel("Parámetros"));
-        nField = addField(panel, "N (claves a insertar):", "1000");
-        seedField = addField(panel, "Semilla (seed):", "42");
-        wField = addField(panel, "W (warmup rounds):", "2");
-        rField = addField(panel, "R (rondas medidas):", "5");
+        nField           = addField(panel, "N (claves a insertar):", "1000");
+        seedField        = addField(panel, "Semilla (seed):", "42");
+        wField           = addField(panel, "W (warmup rounds):", "2");
+        rField           = addField(panel, "R (rondas medidas):", "5");
         searchCountField = addField(panel, "Consultas (búsquedas):", "200");
 
         panel.add(Box.createVerticalStrut(10));
-
-        // Search mode
         panel.add(sectionLabel("Modo de búsqueda"));
+
         ButtonGroup bg = new ButtonGroup();
-        autoSearchRadio = new JRadioButton("Automático (semilla)");
+        autoSearchRadio   = new JRadioButton("Automático (semilla)");
         manualSearchRadio = new JRadioButton("Manual (teclear/pegar)");
         styleRadio(autoSearchRadio);
         styleRadio(manualSearchRadio);
@@ -147,8 +137,6 @@ public class BenchmarkFrame extends JFrame {
         panel.add(loadFileBtn);
 
         panel.add(Box.createVerticalStrut(10));
-
-        // Structures
         panel.add(sectionLabel("Estructuras activas"));
         bstCheck   = addCheck(panel, "BST");
         avlCheck   = addCheck(panel, "AVL");
@@ -159,7 +147,6 @@ public class BenchmarkFrame extends JFrame {
 
         panel.add(Box.createVerticalStrut(10));
 
-        // Buttons — cada uno en su fila, color distintivo
         JButton defaultsBtn = bigButton("Cargar valores por defecto", new Color(52, 120, 210));
         JButton runBtn      = bigButton("Ejecutar Benchmark",          new Color(34, 160, 80));
         JButton exportBtn   = bigButton("Exportar CSV",               new Color(130, 80, 190));
@@ -172,7 +159,6 @@ public class BenchmarkFrame extends JFrame {
             panel.add(Box.createVerticalStrut(5));
         }
 
-        // Actions
         defaultsBtn.addActionListener(e -> loadDefaults());
         runBtn.addActionListener(e -> runBenchmark());
         exportBtn.addActionListener(e -> exportCSV());
@@ -195,41 +181,30 @@ public class BenchmarkFrame extends JFrame {
         resultTable.setForeground(Color.WHITE);
         resultTable.setFont(new Font("Monospaced", Font.PLAIN, 12));
         resultTable.setRowHeight(22);
-        Color headerBlue = new Color(45, 95, 175);
-        resultTable.getTableHeader().setBackground(headerBlue);
+        resultTable.getTableHeader().setBackground(new Color(45, 95, 175));
         resultTable.getTableHeader().setForeground(Color.WHITE);
         resultTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
         resultTable.setGridColor(new Color(60, 65, 85));
         resultTable.setSelectionBackground(new Color(70, 90, 140));
 
-        // Alternate row colors
         resultTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setForeground(Color.WHITE);
-                if (isSelected) {
-                    setBackground(new Color(70, 90, 140));
-                } else if (column == 0) {
-                    setBackground(new Color(45, 50, 70));
-                } else {
-                    setBackground(row % 2 == 0 ? new Color(35, 38, 52) : new Color(42, 45, 62));
-                }
+                if (isSelected) setBackground(new Color(70, 90, 140));
+                else if (column == 0) setBackground(new Color(45, 50, 70));
+                else setBackground(row % 2 == 0 ? new Color(35, 38, 52) : new Color(42, 45, 62));
                 setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
                 return this;
             }
         });
 
-        // Header con color distinto por columna
         Color[] colColors = {
-            new Color(45, 55, 90),   // Metrica
-            new Color(30, 100, 160), // BST
-            new Color(20, 130, 100), // AVL
-            new Color(120, 70, 160), // Splay
-            new Color(160, 50, 50),  // Red-Black
-            new Color(140, 100, 20), // Array
-            new Color(20, 110, 130)  // Lista Enlazada
+            new Color(45, 55, 90), new Color(30, 100, 160), new Color(20, 130, 100),
+            new Color(120, 70, 160), new Color(160, 50, 50), new Color(140, 100, 20),
+            new Color(20, 110, 130)
         };
         resultTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -251,7 +226,6 @@ public class BenchmarkFrame extends JFrame {
         scroll.getViewport().setBackground(new Color(35, 38, 52));
         scroll.setBorder(BorderFactory.createLineBorder(new Color(60, 65, 85)));
         panel.add(scroll, BorderLayout.CENTER);
-
         return panel;
     }
 
@@ -296,20 +270,19 @@ public class BenchmarkFrame extends JFrame {
         setStatus("Running benchmark...");
         log("=== Iniciando benchmark ===");
         log("N=" + cfg.N + ", seed=" + cfg.seed + ", W=" + cfg.W + ", R=" + cfg.R);
-
         tableModel.setRowCount(0);
 
-        SwingWorker<List<BenchmarkResult>, String> worker = new SwingWorker<>() {
+        // SwingWorker parametrized with our custom ResultList
+        SwingWorker<BenchmarkEngine.ResultList, String> worker = new SwingWorker<BenchmarkEngine.ResultList, String>() {
             @Override
-            protected List<BenchmarkResult> doInBackground() {
+            protected BenchmarkEngine.ResultList doInBackground() {
                 BenchmarkEngine engine = new BenchmarkEngine(cfg);
                 engine.setProgressListener(msg -> publish(msg));
-                List<BenchmarkResult> results = engine.run();
+                BenchmarkEngine.ResultList results = engine.run();
                 lastInsertionOrder = engine.getInsertionOrder();
                 lastSearchKeys = engine.getSearchKeys();
                 lastConfig = cfg;
-                // Build final trees for visualizer
-                buildFinalTrees(cfg);
+                buildFinalTrees(cfg, engine.getInsertionOrder());
                 return results;
             }
 
@@ -334,25 +307,31 @@ public class BenchmarkFrame extends JFrame {
         worker.execute();
     }
 
-    private void buildFinalTrees(BenchmarkEngine.Config cfg) {
-        BenchmarkEngine eng = new BenchmarkEngine(cfg);
-        eng.prepare();
-        int[] keys = eng.getInsertionOrder();
-
-        if (cfg.useBST)   { lastBST = new BST(); for (int v : keys) lastBST.insert(v); }
-        if (cfg.useAVL)   { lastAVL = new AVLTree(); for (int v : keys) lastAVL.insert(v); }
-        if (cfg.useSplay) { lastSplay = new SplayTree(); for (int v : keys) lastSplay.insert(v); }
-        if (cfg.useRB)    { lastRB = new RedBlackTree(); for (int v : keys) lastRB.insert(v); }
+    private void buildFinalTrees(BenchmarkEngine.Config cfg, int[] keys) {
+        // If manual mode and user provided keys, use those for the visualizer
+        int[] vizKeys = keys;
+        if (manualSearchRadio.isSelected() && cfg.searchKeys != null && cfg.searchKeys.length > 0) {
+            vizKeys = cfg.searchKeys;
+        }
+        if (cfg.useBST)   { lastBST   = new BST();         for (int v : vizKeys) lastBST.insert(v); }
+        if (cfg.useAVL)   { lastAVL   = new AVLTree();      for (int v : vizKeys) lastAVL.insert(v); }
+        if (cfg.useSplay) { lastSplay  = new SplayTree();   for (int v : vizKeys) lastSplay.insert(v); }
+        if (cfg.useRB)    { lastRB    = new RedBlackTree(); for (int v : vizKeys) lastRB.insert(v); }
+        // Also update lastInsertionOrder so step-by-step uses the same keys
+        lastInsertionOrder = vizKeys;
     }
 
-    private void populateTable(List<BenchmarkResult> results, BenchmarkEngine.Config cfg) {
+    private void populateTable(BenchmarkEngine.ResultList results, BenchmarkEngine.Config cfg) {
         tableModel.setRowCount(0);
 
-        // Update heights
-        if (lastBST != null) { for (BenchmarkResult r : results) if (r.structureName.equals("BST"))         r.heightOrSize = lastBST.getHeight(); }
-        if (lastAVL != null) { for (BenchmarkResult r : results) if (r.structureName.equals("AVL"))         r.heightOrSize = lastAVL.getHeight(); }
-        if (lastSplay != null){ for (BenchmarkResult r : results) if (r.structureName.equals("Splay"))      r.heightOrSize = lastSplay.getHeight(); }
-        if (lastRB != null)  { for (BenchmarkResult r : results) if (r.structureName.equals("Red-Black"))  r.heightOrSize = lastRB.getHeight(); }
+        // Update heights from final trees
+        for (int i = 0; i < results.size(); i++) {
+            BenchmarkResult r = results.get(i);
+            if (r.structureName.equals("BST")       && lastBST   != null) r.heightOrSize = lastBST.getHeight();
+            if (r.structureName.equals("AVL")       && lastAVL   != null) r.heightOrSize = lastAVL.getHeight();
+            if (r.structureName.equals("Splay")     && lastSplay != null) r.heightOrSize = lastSplay.getHeight();
+            if (r.structureName.equals("Red-Black") && lastRB    != null) r.heightOrSize = lastRB.getHeight();
+        }
 
         String[] metrics = {
             "Tiempo Inserción", "Tiempo Búsqueda", "Tiempo Borrado",
@@ -361,7 +340,6 @@ public class BenchmarkFrame extends JFrame {
             "Altura / Tamaño"
         };
 
-        // Build rows (metric → structure values)
         for (String metric : metrics) {
             Object[] row = new Object[7];
             row[0] = metric;
@@ -370,25 +348,22 @@ public class BenchmarkFrame extends JFrame {
                 int col = structureColumn(r.structureName);
                 if (col < 1) continue;
                 row[col] = switch (metric) {
-                    case "Tiempo Inserción"           -> r.formatTime(r.insertTimeNs);
-                    case "Tiempo Búsqueda"            -> r.formatTime(r.searchTimeNs);
-                    case "Tiempo Borrado"             -> r.formatTime(r.deleteTimeNs);
-                    case "Comparaciones Inserción"    -> r.formatComparisons(r.insertComparisons);
-                    case "Comparaciones Búsqueda"     -> r.formatComparisons(r.searchComparisons);
-                    case "Comparaciones Borrado"      -> r.formatComparisons(r.deleteComparisons);
-                    case "O() Inserción"              -> r.insertComplexity;
-                    case "O() Búsqueda"               -> r.searchComplexity;
-                    case "O() Borrado"                -> r.deleteComplexity;
-                    case "Altura / Tamaño"            -> String.valueOf(r.heightOrSize);
+                    case "Tiempo Inserción"        -> r.formatTime(r.insertTimeNs);
+                    case "Tiempo Búsqueda"         -> r.formatTime(r.searchTimeNs);
+                    case "Tiempo Borrado"          -> r.formatTime(r.deleteTimeNs);
+                    case "Comparaciones Inserción" -> r.formatComparisons(r.insertComparisons);
+                    case "Comparaciones Búsqueda"  -> r.formatComparisons(r.searchComparisons);
+                    case "Comparaciones Borrado"   -> r.formatComparisons(r.deleteComparisons);
+                    case "O() Inserción"           -> r.insertComplexity;
+                    case "O() Búsqueda"            -> r.searchComplexity;
+                    case "O() Borrado"             -> r.deleteComplexity;
+                    case "Altura / Tamaño"         -> String.valueOf(r.heightOrSize);
                     default -> "";
                 };
             }
-            // Fill empty cells with —
             for (int c = 1; c < 7; c++) if (row[c] == null) row[c] = "—";
             tableModel.addRow(row);
         }
-
-        // Footer row
         tableModel.addRow(new Object[]{"N=" + cfg.N + " W=" + cfg.W + " R=" + cfg.R, "", "", "", "", "", ""});
     }
 
@@ -405,10 +380,7 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void exportCSV() {
-        if (lastResults == null) {
-            showInfo("Run the benchmark first.");
-            return;
-        }
+        if (lastResults == null) { showInfo("Run the benchmark first."); return; }
         JFileChooser fc = new JFileChooser();
         fc.setDialogTitle("Save CSV");
         fc.setFileFilter(new FileNameExtensionFilter("CSV Files", "csv"));
@@ -433,7 +405,6 @@ public class BenchmarkFrame extends JFrame {
         vizDialog.getContentPane().setBackground(new Color(30, 30, 42));
         vizDialog.setLayout(new BorderLayout(6, 6));
 
-        // Selectors
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
         topPanel.setBackground(new Color(40, 42, 58));
         String[] treeTypes = {"BST", "AVL", "Splay", "Red-Black"};
@@ -442,11 +413,9 @@ public class BenchmarkFrame extends JFrame {
         comboB.setSelectedIndex(1);
         styleCombo(comboA); styleCombo(comboB);
 
-        topPanel.add(vizLabel("Árbol A:"));
-        topPanel.add(comboA);
+        topPanel.add(vizLabel("Árbol A:")); topPanel.add(comboA);
         topPanel.add(Box.createHorizontalStrut(20));
-        topPanel.add(vizLabel("Árbol B:"));
-        topPanel.add(comboB);
+        topPanel.add(vizLabel("Árbol B:")); topPanel.add(comboB);
 
         JButton refreshBtn = new JButton("Actualizar");
         styleButton2(refreshBtn, new Color(55, 130, 220));
@@ -502,7 +471,7 @@ public class BenchmarkFrame extends JFrame {
                 }
                 manualKeysArea.setText(keys.toString());
                 manualSearchRadio.setSelected(true);
-                log("Archivo cargado: " + fc.getSelectedFile().getName() + " (" + keys.toString().split("\\s+").length + " claves)");
+                log("Archivo cargado: " + fc.getSelectedFile().getName());
                 setStatus("Búsquedas cargadas del archivo.");
             } catch (Exception ex) {
                 showError("Error al cargar archivo: " + ex.getMessage());
@@ -515,12 +484,11 @@ public class BenchmarkFrame extends JFrame {
     private BenchmarkEngine.Config buildConfig() {
         try {
             BenchmarkEngine.Config cfg = new BenchmarkEngine.Config();
-            cfg.N = Integer.parseInt(nField.getText().trim());
-            cfg.seed = Long.parseLong(seedField.getText().trim());
-            cfg.W = Integer.parseInt(wField.getText().trim());
-            cfg.R = Integer.parseInt(rField.getText().trim());
+            cfg.N           = Integer.parseInt(nField.getText().trim());
+            cfg.seed        = Long.parseLong(seedField.getText().trim());
+            cfg.W           = Integer.parseInt(wField.getText().trim());
+            cfg.R           = Integer.parseInt(rField.getText().trim());
             cfg.searchCount = Integer.parseInt(searchCountField.getText().trim());
-
             cfg.useBST   = bstCheck.isSelected();
             cfg.useAVL   = avlCheck.isSelected();
             cfg.useSplay = splayCheck.isSelected();
@@ -578,7 +546,6 @@ public class BenchmarkFrame extends JFrame {
         lbl.setFont(new Font("SansSerif", Font.PLAIN, 11));
         lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(lbl);
-
         JTextField field = new JTextField(defaultValue);
         field.setBackground(new Color(50, 52, 72));
         field.setForeground(Color.WHITE);
@@ -616,12 +583,8 @@ public class BenchmarkFrame extends JFrame {
 
     private JButton bigButton(String text, Color bg) {
         JButton btn = new JButton(text);
-        btn.setOpaque(true);
-        btn.setContentAreaFilled(true);
-        btn.setBorderPainted(false);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
+        btn.setOpaque(true); btn.setContentAreaFilled(true); btn.setBorderPainted(false);
+        btn.setBackground(bg); btn.setForeground(Color.WHITE); btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 11));
         btn.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
         btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
@@ -630,8 +593,7 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void styleRadio(JRadioButton rb) {
-        rb.setOpaque(true);
-        rb.setBackground(new Color(38, 38, 52));
+        rb.setOpaque(true); rb.setBackground(new Color(38, 38, 52));
         rb.setForeground(new Color(200, 210, 240));
         rb.setFont(new Font("SansSerif", Font.PLAIN, 12));
         rb.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -651,16 +613,9 @@ public class BenchmarkFrame extends JFrame {
     }
 
     private void styleButton2(JButton btn, Color bg) {
-        btn.setOpaque(true);
-        btn.setContentAreaFilled(true);
-        btn.setBorderPainted(false);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
+        btn.setOpaque(true); btn.setContentAreaFilled(true); btn.setBorderPainted(false);
+        btn.setBackground(bg); btn.setForeground(Color.WHITE); btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 12));
         btn.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
     }
 }
-
-
-
