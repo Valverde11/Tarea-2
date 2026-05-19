@@ -10,6 +10,7 @@ public class TreeVisualizerPanel extends JPanel {
 
     private String treeAType = "BST";
     private String treeBType = "AVL";
+    private boolean singleSnapshotMode = false;
 
     private BST bst;
     private AVLTree avl;
@@ -25,6 +26,7 @@ public class TreeVisualizerPanel extends JPanel {
     }
 
     public void setTrees(BST bst, AVLTree avl, SplayTree splay, RedBlackTree rb) {
+        this.singleSnapshotMode = false;
         this.bst = bst;
         this.avl = avl;
         this.splay = splay;
@@ -33,6 +35,7 @@ public class TreeVisualizerPanel extends JPanel {
     }
 
     public void setTreeTypes(String typeA, String typeB) {
+        this.singleSnapshotMode = false;
         this.treeAType = typeA;
         this.treeBType = typeB;
         refreshSnapshots();
@@ -40,10 +43,11 @@ public class TreeVisualizerPanel extends JPanel {
     }
 
     public void setSnapshot(String type, List<int[]> snapshot) {
+        this.singleSnapshotMode = true;
         this.treeAType = type;
-        this.treeBType = type;
+        this.treeBType = "";
         this.snapshotA = snapshot;
-        this.snapshotB = snapshot;
+        this.snapshotB = null;
         this.bst = null;
         this.avl = null;
         this.splay = null;
@@ -75,24 +79,30 @@ public class TreeVisualizerPanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
         int half = w / 2;
+        int treeWidth = singleSnapshotMode ? w : half;
+        int treeALabelX = singleSnapshotMode ? Math.max(10, w / 2 - 40) : 10;
 
         // Draw separator
-        g2.setColor(new Color(60, 60, 80));
-        g2.drawLine(half, 0, half, h);
+        if (!singleSnapshotMode) {
+            g2.setColor(new Color(60, 60, 80));
+            g2.drawLine(half, 0, half, h);
+        }
 
-        // Draw tree A (left side)
-        drawTreeLabel(g2, treeAType, 10, 20);
+        // Draw tree A (left side or single full-width tree)
+        drawTreeLabel(g2, treeAType, treeALabelX, 20);
         if (snapshotA != null && !snapshotA.isEmpty())
-            drawTree(g2, snapshotA, 0, half, h, false);
+            drawTree(g2, snapshotA, 0, treeWidth, h, false);
         else
-            drawEmpty(g2, 0, half, h);
+            drawEmpty(g2, 0, treeWidth, h);
 
-        // Draw tree B (right side)
-        drawTreeLabel(g2, treeBType, half + 10, 20);
-        if (snapshotB != null && !snapshotB.isEmpty())
-            drawTree(g2, snapshotB, half, w, h, treeBType.equals("Red-Black"));
-        else
-            drawEmpty(g2, half, w, h);
+        if (!singleSnapshotMode) {
+            // Draw tree B (right side)
+            drawTreeLabel(g2, treeBType, half + 10, 20);
+            if (snapshotB != null && !snapshotB.isEmpty())
+                drawTree(g2, snapshotB, half, w, h, treeBType.equals("Red-Black"));
+            else
+                drawEmpty(g2, half, w, h);
+        }
     }
 
     private void drawTreeLabel(Graphics2D g2, String label, int x, int y) {
