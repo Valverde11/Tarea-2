@@ -1,7 +1,4 @@
 
-/**
- * Holds all timing and comparison results for one structure after a benchmark run.
- */
 public class BenchmarkResult {
     public final String structureName;
 
