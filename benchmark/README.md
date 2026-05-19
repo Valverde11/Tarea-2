@@ -11,11 +11,9 @@ Aplicación Java para comparar el desempeño (tiempos y comparaciones de clave) 
 ## Compilación y Ejecución
 
 ```bash
-# Navegar al directorio del proyecto
-cd benchmark
 
 # Ejecutar
-java -cp out Main
+Dirigase a la clase Main y ejecute el codigo con run o F5
 ```
 
 ## Interfaz Gráfica
