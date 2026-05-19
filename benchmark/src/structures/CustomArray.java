@@ -1,10 +1,4 @@
 
-
-/**
- * Custom contiguous array structure.
- * Supports append, linear search, linear delete.
- * Own implementation (not ArrayList).
- */
 public class CustomArray {
     private int[] data;
     private int size;

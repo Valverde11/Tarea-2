@@ -1,9 +1,4 @@
 
-/**
- * AVL Tree implementation.
- * Balances via single and double rotations.
- * Based on CE-1103 Lesson 05 - Hierarchical Data Structures.
- */
 public class AVLTree {
     private static final int ALLOWED_IMBALANCE = 1;
     private AVLNode root;

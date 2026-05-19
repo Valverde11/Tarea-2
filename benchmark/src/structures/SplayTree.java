@@ -1,9 +1,4 @@
 
-/**
- * Splay Tree implementation.
- * Uses Zig, Zig-Zig and Zig-Zag rotations to bring accessed nodes to the root.
- * Based on CE-1103 Lesson 05 - Hierarchical Data Structures.
- */
 public class SplayTree {
 
     public static class SplayNode {

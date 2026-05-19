@@ -1,13 +1,4 @@
-/**
- * Runs the benchmark for all selected structures.
- * Protocol:
- *  1. W warmup rounds (not counted)
- *  2. R measured rounds → averaged
- *  Phases per round: (1) insert → (2) search → (3) delete (except RB)
- *  Same insertion sequence (from seed), same search keys, same deletion order.
- *
- * NOTE: No java.util.* used. Custom structures only.
- */
+
 public class BenchmarkEngine {
 
     public static class Config {

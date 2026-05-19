@@ -1,10 +1,5 @@
 
 
-/**
- * Custom singly linked list.
- * Supports insert (append), linear search, linear delete.
- * Own implementation (not java.util.LinkedList).
- */
 public class CustomLinkedList {
 
     private static class ListNode {

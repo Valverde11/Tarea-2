@@ -6,11 +6,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.io.File;
 
-/**
- * Main application window for the benchmark.
- * CE-1103 Extraclase 2 — BST, AVL, Splay, Red-Black, Array, Linked List benchmark.
- * NOTE: No java.util.List used. Uses BenchmarkEngine.ResultList.
- */
+
 public class BenchmarkFrame extends JFrame {
 
     // Config inputs

@@ -1,13 +1,4 @@
 
-/**
- * Red-Black Tree implementation.
- * Only insert and search are measured (delete is N/A per assignment spec).
- * Invariants:
- *  1. Every node is RED or BLACK.
- *  2. Root is BLACK.
- *  3. Red nodes have BLACK children.
- *  4. All paths from a node to null leaves have the same number of black nodes.
- */
 public class RedBlackTree {
 
     static final boolean RED = true;
