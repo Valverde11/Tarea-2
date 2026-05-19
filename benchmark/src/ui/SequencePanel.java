@@ -114,6 +114,19 @@ public class SequencePanel extends JDialog {
             if (splay != null) splay.insert(v);
             if (rb != null)    rb.insert(v);
 
+            // If BST produced intermediate snapshots (rotations), include them step-by-step
+            if (bst != null && type.equals("BST")) {
+                List<List<int[]>> ops = bst.getSnapshotsHistory();
+                if (ops != null && !ops.isEmpty()) {
+                    int sub = 1;
+                    for (List<int[]> s : ops) {
+                        snapshots.add(s);
+                        stepDescriptions.add("Step " + (i + 1) + "." + (sub++) + ": inserted " + v + " | Height: " + getHeight(type, bst, avl, splay, rb));
+                    }
+                    continue;
+                }
+            }
+
             List<int[]> snap = null;
             if (bst != null)   snap = bst.getSnapshot();
             if (avl != null)   snap = avl.getSnapshot();

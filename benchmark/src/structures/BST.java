@@ -11,6 +11,8 @@ import java.util.List;
 public class BST {
     private BSTNode root;
     private long comparisons;
+    // History of snapshots produced during the last operation (e.g., insert)
+    private List<List<int[]>> opSnapshots = new ArrayList<>();
 
     public BST() {
         this.root = null;
@@ -21,17 +23,27 @@ public class BST {
     public long getComparisons() { return comparisons; }
 
     public void insert(int element) {
+        opSnapshots.clear();
         root = insert(element, root);
+        // record final state after insertion
+        recordSnapshot();
     }
 
     private BSTNode insert(int element, BSTNode node) {
-        if (node == null) return new BSTNode(element);
+        if (node == null) {
+            BSTNode nn = new BSTNode(element);
+            recordSnapshot();
+            return nn;
+        }
         comparisons++;
         if (element < node.element) {
             node.left = insert(element, node.left);
         } else if (element > node.element) {
             node.right = insert(element, node.right);
         }
+        // update height and balance
+        node.height = Math.max(height(node.left), height(node.right)) + 1;
+        node = balance(node);
         return node;
     }
 
@@ -65,6 +77,8 @@ public class BST {
             node.element = min.element;
             node.right = delete(min.element, node.right);
         }
+        if (node != null) node.height = Math.max(height(node.left), height(node.right)) + 1;
+        node = balance(node);
         return node;
     }
 
@@ -78,8 +92,7 @@ public class BST {
     }
 
     private int height(BSTNode node) {
-        if (node == null) return -1;
-        return 1 + Math.max(height(node.left), height(node.right));
+        return node == null ? -1 : node.height;
     }
 
     public boolean isEmpty() { return root == null; }
@@ -91,6 +104,67 @@ public class BST {
         List<int[]> nodes = new ArrayList<>();
         collectSnapshot(root, nodes, 0, 0, 0);
         return nodes;
+    }
+
+    // --- Rotation / balancing (AVL-like) ---
+    private BSTNode balance(BSTNode t) {
+        if (t == null) return null;
+        if (height(t.left) - height(t.right) > 1) {
+            if (height(t.left.left) >= height(t.left.right))
+                t = rotateWithLeftChild(t); // LL
+            else
+                t = doubleWithLeftChild(t); // LR
+        } else if (height(t.right) - height(t.left) > 1) {
+            if (height(t.right.right) >= height(t.right.left))
+                t = rotateWithRightChild(t); // RR
+            else
+                t = doubleWithRightChild(t); // RL
+        }
+        return t;
+    }
+
+    private BSTNode rotateWithLeftChild(BSTNode k2) {
+        BSTNode k1 = k2.left;
+        k2.left = k1.right;
+        k1.right = k2;
+        k2.height = Math.max(height(k2.left), height(k2.right)) + 1;
+        k1.height = Math.max(height(k1.left), k2.height) + 1;
+        recordSnapshot();
+        return k1;
+    }
+
+    private BSTNode rotateWithRightChild(BSTNode k1) {
+        BSTNode k2 = k1.right;
+        k1.right = k2.left;
+        k2.left = k1;
+        k1.height = Math.max(height(k1.left), height(k1.right)) + 1;
+        k2.height = Math.max(k1.height, height(k2.right)) + 1;
+        recordSnapshot();
+        return k2;
+    }
+
+    private BSTNode doubleWithLeftChild(BSTNode k3) {
+        k3.left = rotateWithRightChild(k3.left);
+        return rotateWithLeftChild(k3);
+    }
+
+    private BSTNode doubleWithRightChild(BSTNode k1) {
+        k1.right = rotateWithLeftChild(k1.right);
+        return rotateWithRightChild(k1);
+    }
+
+    // Record a snapshot of current tree state to opSnapshots
+    private void recordSnapshot() {
+        List<int[]> snap = new ArrayList<>();
+        collectSnapshot(root, snap, 0, 0, 0);
+        opSnapshots.add(snap);
+    }
+
+    // Return and clear the operation snapshots collected during last operation
+    public List<List<int[]>> getSnapshotsHistory() {
+        List<List<int[]>> out = new ArrayList<>(opSnapshots);
+        opSnapshots.clear();
+        return out;
     }
 
     private void collectSnapshot(BSTNode node, List<int[]> nodes, int depth, int pos, int parentIdx) {
