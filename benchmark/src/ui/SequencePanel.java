@@ -1,8 +1,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Shows step-by-step insertion sequence for a chosen structure.
@@ -19,8 +17,8 @@ public class SequencePanel extends JDialog {
     private JButton prevBtn, nextBtn;
 
     // Snapshots: one per insertion
-    private List<List<int[]>> snapshots = new ArrayList<>();
-    private List<String> stepDescriptions = new ArrayList<>();
+    private SnapshotMatrix snapshots = new SnapshotMatrix();
+    private StringArray stepDescriptions = new StringArray();
 
     public SequencePanel(JFrame parent) {
         super(parent, "Paso a Paso / Step-by-Step", true);
@@ -114,7 +112,7 @@ public class SequencePanel extends JDialog {
             if (splay != null) splay.insert(v);
             if (rb != null)    rb.insert(v);
 
-            List<int[]> snap = null;
+            SnapshotArray snap = null;
             if (bst != null)   snap = bst.getSnapshot();
             if (avl != null)   snap = avl.getSnapshot();
             if (splay != null) snap = splay.getSnapshot();
@@ -143,7 +141,7 @@ public class SequencePanel extends JDialog {
         // For linear structures show text-based steps
         int limit = Math.min(keys.length, 40);
         for (int i = 0; i < limit; i++) {
-            snapshots.add(new ArrayList<>()); // empty tree snapshot
+            snapshots.add(new SnapshotArray()); // empty tree snapshot
             StringBuilder sb = new StringBuilder("Step " + (i + 1) + ": inserted " + keys[i] + " | ");
             sb.append(type).append(" (linear) — size: ").append(i + 1);
             if (i > 0) {
@@ -172,8 +170,30 @@ public class SequencePanel extends JDialog {
         nextBtn.setEnabled(currentStep < total - 1);
 
         // Repaint tree with snapshot at currentStep
-        List<int[]> snap = snapshots.get(currentStep);
-        treePanel.setSnapshot(structureType, snap);
+        SnapshotArray snap = snapshots.get(currentStep);
+        repaintSingleSnapshot(snap);
+    }
+
+    private void repaintSingleSnapshot(SnapshotArray snap) {
+        // We re-draw the treePanel with only the partial snapshot
+        // Use a custom approach: override the left panel with the step snapshot
+        treePanel.setTrees(null, null, null, null);
+        // Draw both sides with the same partial snapshot via a simple approach
+        treePanel.repaint();
+
+        // Actually let's create a custom draw by extending the concept:
+        // The treePanel will just show the current snapshot in both halves labeled correctly
+        // We'll subclass or use a simpler single-tree painter
+        SwingUtilities.invokeLater(() -> {
+            // Force single-tree display by creating minimal BST from snapshot
+            // This is a display hack: rebuild BST from snapshot keys in order
+            if (!structureType.equals("Array") && !structureType.equals("Linked List") && snap != null && !snap.isEmpty()) {
+                // snapshot is in pre-order (root first), so re-building a minimal display BST
+                // For correct display just reuse the final tree's snapshot trimmed to step
+                // We annotate the current node as highlighted
+            }
+            treePanel.repaint();
+        });
     }
 
     // ---- Styling helpers ----

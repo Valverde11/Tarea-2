@@ -1,8 +1,4 @@
 
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Binary Search Tree (BST) implementation.
  * Supports insert, search, delete with comparison counting.
@@ -87,13 +83,13 @@ public class BST {
     public BSTNode getRoot() { return root; }
 
     /** Returns all nodes in insertion order (level-order snapshot for visualization) */
-    public List<int[]> getSnapshot() {
-        List<int[]> nodes = new ArrayList<>();
+    public SnapshotArray getSnapshot() {
+        SnapshotArray nodes = new SnapshotArray();
         collectSnapshot(root, nodes, 0, 0, 0);
         return nodes;
     }
 
-    private void collectSnapshot(BSTNode node, List<int[]> nodes, int depth, int pos, int parentIdx) {
+    private void collectSnapshot(BSTNode node, SnapshotArray nodes, int depth, int pos, int parentIdx) {
         if (node == null) return;
         int myIdx = nodes.size();
         nodes.add(new int[]{node.element, depth, pos, parentIdx, myIdx});
