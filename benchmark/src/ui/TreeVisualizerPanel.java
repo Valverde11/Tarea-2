@@ -39,6 +39,18 @@ public class TreeVisualizerPanel extends JPanel {
         repaint();
     }
 
+    public void setSnapshot(String type, List<int[]> snapshot) {
+        this.treeAType = type;
+        this.treeBType = type;
+        this.snapshotA = snapshot;
+        this.snapshotB = snapshot;
+        this.bst = null;
+        this.avl = null;
+        this.splay = null;
+        this.rb = null;
+        repaint();
+    }
+
     private void refreshSnapshots() {
         snapshotA = getSnapshot(treeAType);
         snapshotB = getSnapshot(treeBType);

@@ -173,29 +173,7 @@ public class SequencePanel extends JDialog {
 
         // Repaint tree with snapshot at currentStep
         List<int[]> snap = snapshots.get(currentStep);
-        repaintSingleSnapshot(snap);
-    }
-
-    private void repaintSingleSnapshot(List<int[]> snap) {
-        // We re-draw the treePanel with only the partial snapshot
-        // Use a custom approach: override the left panel with the step snapshot
-        treePanel.setTrees(null, null, null, null);
-        // Draw both sides with the same partial snapshot via a simple approach
-        treePanel.repaint();
-
-        // Actually let's create a custom draw by extending the concept:
-        // The treePanel will just show the current snapshot in both halves labeled correctly
-        // We'll subclass or use a simpler single-tree painter
-        SwingUtilities.invokeLater(() -> {
-            // Force single-tree display by creating minimal BST from snapshot
-            // This is a display hack: rebuild BST from snapshot keys in order
-            if (!structureType.equals("Array") && !structureType.equals("Linked List") && snap != null && !snap.isEmpty()) {
-                // snapshot is in pre-order (root first), so re-building a minimal display BST
-                // For correct display just reuse the final tree's snapshot trimmed to step
-                // We annotate the current node as highlighted
-            }
-            treePanel.repaint();
-        });
+        treePanel.setSnapshot(structureType, snap);
     }
 
     // ---- Styling helpers ----
